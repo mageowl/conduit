@@ -1,4 +1,5 @@
 import * as path from "jsr:@std/path";
+import { NBTValue } from "./types.ts";
 
 interface MemberMap {
   map: Map<string, Member>;
@@ -7,7 +8,12 @@ interface MemberMap {
 }
 
 export default class Namespace {
+  name: string;
   private members: Map<string, MemberMap> = new Map();
+
+  constructor(name: string) {
+    this.name = name;
+  }
 
   add(name: string, member: Member | Macro) {
     if (member instanceof Member) {
@@ -28,9 +34,7 @@ export default class Namespace {
       }
       map.set(name, member);
     } else {
-      for (const [k, v] of Object.entries(member(name))) {
-        this.add(k, v);
-      }
+      member(name, this);
     }
   }
 
@@ -43,10 +47,18 @@ export default class Namespace {
             savePath,
             dataFolder,
           );
+          const foldersCreated = [""];
           await Deno.mkdir(dataPath);
 
           await Promise.all(
             map.entries().map(async ([name, member]) => {
+              const dirname = path.dirname(name);
+              if (!foldersCreated.includes(dirname)) {
+                await Deno.mkdir(path.join(dataPath, dirname), {
+                  recursive: true,
+                });
+              }
+
               const filePath = path.join(dataPath, name) +
                 `.${fileExtension}`;
               await member.save(filePath);
@@ -56,6 +68,10 @@ export default class Namespace {
       ),
     );
   }
+
+  toString() {
+    return this.name;
+  }
 }
 
 export abstract class Member {
@@ -64,5 +80,18 @@ export abstract class Member {
 
   abstract save(filePath: string): Promise<void>;
 }
+export abstract class JSONMember extends Member {
+  override readonly fileExtension = "json";
 
-export type Macro = (name: string) => { [name: string]: Member | Macro };
+  abstract saveJSON(): NBTValue;
+  override async save(filePath: string) {
+    const encoder = new TextEncoder();
+    const file = await Deno.create(filePath);
+    file.write(encoder.encode(JSON.stringify(this.saveJSON())));
+  }
+}
+
+export type Macro = (
+  name: string,
+  namespace: Namespace,
+) => void;

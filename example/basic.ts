@@ -1,5 +1,5 @@
 import * as conduit from "../src/main.ts";
-const { cmd } = conduit;
+const { tellraw, Selector } = conduit.cmd;
 
 const pack = new conduit.Datapack({
   minecraftVersion: "1.21.5",
@@ -10,7 +10,7 @@ const namespace = pack.namespace("test");
 namespace.add(
   "hello_world",
   new conduit.Function([
-    cmd.say("Hello World!"),
+    tellraw(Selector.players(), "Hello World!"),
   ]),
 );
 

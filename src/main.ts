@@ -1,8 +1,16 @@
 import Namespace from "./namespace.ts";
 import * as path from "jsr:@std/path";
+import { error } from "./util.ts";
 
-export { default as cmd } from "./cmd.ts";
+export { JSONMember, Member } from "./namespace.ts";
+export type * from "./types.ts";
+export * as cmd from "./cmd.ts";
+export { default as ItemStack } from "./item.ts";
+
 export { default as Function } from "./member/function.ts";
+export { default as Advancement } from "./member/advancement.ts";
+
+export { error, warning } from "./util.ts";
 
 interface PackMetadata {
   minecraftVersion: MinecraftVersion;
@@ -31,26 +39,28 @@ export class Datapack {
     if (this.namespaces.has(name)) {
       return this.namespaces.get(name)!;
     } else {
-      const namespace = new Namespace();
+      const namespace = new Namespace(name);
       this.namespaces.set(name, namespace);
       return namespace;
     }
   }
 
-  async save(savePath: string): Promise<bool> {
+  async save(savePath: string): Promise<boolean> {
     const readRes = await Deno.permissions.request({
       name: "read",
       path: savePath,
     });
     if (readRes.state != "granted") {
-      console.log("Failed to save datapack. You need to allow read access.");
+      error("Failed to save datapack. You need to allow read access.");
+      return false;
     }
     const writeRes = await Deno.permissions.request({
       name: "write",
       path: savePath,
     });
     if (writeRes.state != "granted") {
-      console.log("Failed to save datapack. You need to allow write access.");
+      error("Failed to save datapack. You need to allow write access.");
+      return false;
     }
 
     await (Deno.remove(savePath, { recursive: true }).catch(() => {}));
@@ -72,5 +82,8 @@ export class Datapack {
         await namespace.save(path.join(dataPath, name));
       }),
     );
+
+    console.log(`%c✅ Saved datapack to ${savePath}`, "font-weight:bold;");
+    return true;
   }
 }

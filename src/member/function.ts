@@ -4,11 +4,11 @@ export default class Function extends Member {
   override readonly fileExtension = "mcfunction";
   override readonly dataFolder = "function";
 
-  private lines: string[];
+  lines: string[];
 
   constructor(conf: string[]) {
     super();
-    this.lines = conf;
+    this.lines = conf.map((line) => line.replaceAll("\n", ""));
   }
 
   override async save(filePath: string) {
