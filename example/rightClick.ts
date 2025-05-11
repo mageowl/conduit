@@ -1,5 +1,5 @@
 import * as conduit from "../src/main.ts";
-const { Selector, give, advancement, tellraw } = conduit.cmd;
+const { Selector, Pos, give, advancement, tellraw, particle } = conduit.cmd;
 
 export default function onRightClick(
   item: conduit.ItemStack,
@@ -12,7 +12,7 @@ export default function onRightClick(
       );
     }
 
-    callback.lines.unshift(
+    callback.body.unshift(
       advancement.revoke.only(
         Selector.self(),
         `${namespace}:on_right_click/${name}`,
@@ -80,6 +80,11 @@ if (import.meta.main) {
       rightClickWand,
       new conduit.Function([
         tellraw(Selector.self(), "Poof!"),
+        particle({
+          id: "dust",
+          color: [0.9, 0.7, 1.0],
+          scale: 1,
+        }, Pos.rotLocal(0, 0, 1)),
       ]),
     ),
   );
@@ -94,7 +99,7 @@ if (import.meta.main) {
         "A  ",
       ],
       key: {
-        A: "resin",
+        A: "resin_clump",
       },
       result: rightClickWand.toJSON(),
     }),

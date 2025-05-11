@@ -4,16 +4,16 @@ export default class Function extends Member {
   override readonly fileExtension = "mcfunction";
   override readonly dataFolder = "function";
 
-  lines: string[];
+  body: string[];
 
-  constructor(conf: string[]) {
+  constructor(body: string[]) {
     super();
-    this.lines = conf.map((line) => line.replaceAll("\n", ""));
+    this.body = body.map((line) => line.replaceAll("\n", ""));
   }
 
   override async save(filePath: string) {
     const encoder = new TextEncoder();
     const file = await Deno.create(filePath);
-    file.write(encoder.encode(this.lines.join("\n")));
+    file.write(encoder.encode(this.body.join("\n")));
   }
 }
