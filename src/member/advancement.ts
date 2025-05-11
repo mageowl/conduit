@@ -6,7 +6,7 @@ import { NBTValue } from "../types.ts";
 export default class Advancement<
   T extends { [name: string]: AdvancementCriteria },
 > extends JSONMember {
-  override dataFolder: string = "advancement";
+  override readonly dataFolder: string = "advancement";
   data: AdvancementDefinition<T>;
 
   constructor(data: AdvancementDefinition<T>) {

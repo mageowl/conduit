@@ -84,5 +84,21 @@ if (import.meta.main) {
     ),
   );
 
+  namespace.add(
+    "wand",
+    new conduit.Recipe({
+      type: "crafting_shaped",
+      pattern: [
+        "  A",
+        " A ",
+        "A  ",
+      ],
+      key: {
+        A: "resin",
+      },
+      result: rightClickWand.toJSON(),
+    }),
+  );
+
   await pack.save("./example_out/rightClick/");
 }

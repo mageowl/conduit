@@ -9,6 +9,7 @@ export { default as ItemStack } from "./item.ts";
 
 export { default as Function } from "./member/function.ts";
 export { default as Advancement } from "./member/advancement.ts";
+export { default as Recipe } from "./member/recipe.ts";
 
 export { error, warning } from "./util.ts";
 

@@ -1,0 +1,166 @@
+import { ItemStackJSON } from "../item.ts";
+import { JSONMember } from "../namespace.ts";
+import { NBTValue } from "../types.ts";
+
+export default class Recipe<T extends { [char: string]: RecipeIngredient }>
+  extends JSONMember {
+  override readonly dataFolder = "recipe";
+  data: RecipeDefinition<T>;
+
+  constructor(data: RecipeDefinition<T>) {
+    super();
+    this.data = data;
+  }
+
+  override saveJSON(): NBTValue {
+    return this.data;
+  }
+}
+
+type RecipeDefinition<T extends { [char: string]: RecipeIngredient }> =
+  | BlastingRecipe
+  | CampfireCookingRecipe
+  | CraftingShapedRecipe<T>
+  | CraftingShapelessRecipe
+  | CraftingTransmuteRecipe
+  | CraftingSpecialRecipe
+  | CraftingDecoratedPotRecipe
+  | SmeltingRecipe
+  | SmithingTransformRecipe
+  | SmithingTrimRecipe
+  | SmokingRecipe
+  | StonecuttingRecipe;
+
+type RecipeIngredient = string | string[];
+
+type BlastingRecipe = {
+  type: "blasting";
+  category?: "blocks" | "misc";
+  group?: string;
+  ingredient: RecipeIngredient;
+  cookingtime?: number;
+  result: ItemStackJSON;
+  experience?: number;
+};
+type CampfireCookingRecipe = {
+  type: "campfire_cooking";
+  ingredient: RecipeIngredient;
+  cookingtime?: number;
+  result: ItemStackJSON;
+};
+
+type CraftingRecipeCategory = "equipment" | "building" | "misc" | "redstone";
+
+type RecipedPatternRow3<T> = `${keyof T & string | " "}${
+  | keyof T & string
+  | " "}${
+  | keyof T & string
+  | " "}`;
+type ShapedRecipePatternRow2<T> = `${keyof T & string | " "}${
+  | keyof T & string
+  | " "}`;
+type ShapedRecipePatternRow1<T> = keyof T & string | " ";
+type ShapedRecipePattern<T> =
+  | [RecipedPatternRow3<T>, RecipedPatternRow3<T>, RecipedPatternRow3<T>]
+  | [RecipedPatternRow3<T>, RecipedPatternRow3<T>]
+  | [RecipedPatternRow3<T>]
+  | [
+    ShapedRecipePatternRow2<T>,
+    ShapedRecipePatternRow2<T>,
+    ShapedRecipePatternRow2<T>,
+  ]
+  | [ShapedRecipePatternRow2<T>, ShapedRecipePatternRow2<T>]
+  | [ShapedRecipePatternRow2<T>]
+  | [
+    ShapedRecipePatternRow1<T>,
+    ShapedRecipePatternRow1<T>,
+    ShapedRecipePatternRow1<T>,
+  ]
+  | [ShapedRecipePatternRow1<T>, ShapedRecipePatternRow1<T>]
+  | [ShapedRecipePatternRow1<T>];
+type CraftingShapedRecipe<T extends { [char: string]: RecipeIngredient }> = {
+  type: "crafting_shaped";
+  category?: CraftingRecipeCategory;
+  group?: string;
+  pattern: ShapedRecipePattern<T>;
+  key: T;
+  result: ItemStackJSON;
+};
+
+type CraftingShapelessRecipe = {
+  type: "crafting_shapeless";
+  category?: CraftingRecipeCategory;
+  group?: string;
+  ingredients: RecipeIngredient[];
+  result: ItemStackJSON;
+};
+
+type CraftingTransmuteRecipe = {
+  type: "crafting_transmute";
+  category?: CraftingRecipeCategory;
+  group?: string;
+  input: RecipeIngredient;
+  material: RecipeIngredient;
+  result: string;
+};
+
+type CraftingSpecialType =
+  | "armordye"
+  | "bannerduplicate"
+  | "bookcloning"
+  | "firework_rocket"
+  | "firework_star"
+  | "firework_star_fade"
+  | "mapcloning"
+  | "mapextending"
+  | "repairitem"
+  | "shielddecoration"
+  | "tippedarrow";
+type CraftingSpecialRecipe = {
+  type: `crafting_special_${CraftingSpecialType}`;
+};
+
+type CraftingDecoratedPotRecipe = {
+  type: "crafting_decorated_pot";
+  category?: CraftingRecipeCategory;
+};
+
+type SmeltingRecipe = {
+  type: "smelting";
+  category?: "food" | "blocks" | "misc";
+  group?: string;
+  ingredient: RecipeIngredient;
+  cookingtime?: number;
+  result: ItemStackJSON;
+  experience?: number;
+};
+
+type SmithingTransformRecipe = {
+  type: "smithing_transform";
+  template: RecipeIngredient;
+  base: RecipeIngredient;
+  addition: RecipeIngredient;
+  result: ItemStackJSON;
+};
+
+type SmithingTrimRecipe = {
+  type: "smithing_trim";
+  template: RecipeIngredient;
+  base: RecipeIngredient;
+  addition: RecipeIngredient;
+};
+
+type SmokingRecipe = {
+  type: "smoking";
+  group?: string;
+  ingredient: RecipeIngredient;
+  cookingtime?: number;
+  result: ItemStackJSON;
+  experience?: number;
+};
+
+type StonecuttingRecipe = {
+  type: "stonecutting";
+  ingredient: RecipeIngredient;
+  result: ItemStackJSON;
+};
