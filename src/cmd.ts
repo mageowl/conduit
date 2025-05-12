@@ -18,7 +18,7 @@ function advancementSubCommands(action: "grant" | "revoke") {
     (selector: Selector, id: Identifier<Advancement>) =>
       `advancement ${action} ${selector} ${target} ${id}`;
   return {
-    only<T>(
+    only(
       selector: Selector,
       id: Identifier<Advancement>,
       criterion?: string,

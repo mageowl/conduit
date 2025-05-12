@@ -13,6 +13,11 @@ const rightClickHandler = conduit.macro(function (
       );
     }
 
+    const callbackId = namespace.reserve(
+      `on_right_click/${name}`,
+      conduit.Function,
+    );
+
     const predicate: conduit.NBTObject = {};
     if (item.components.custom_data?.custom_id != null) {
       predicate.predicates = {
@@ -33,7 +38,7 @@ const rightClickHandler = conduit.macro(function (
           },
         },
         rewards: {
-          function: `${namespace}:on_right_click/${name}`,
+          function: callbackId.toString(),
         },
       }),
     );
@@ -44,7 +49,7 @@ const rightClickHandler = conduit.macro(function (
         trigger,
       ),
     );
-    namespace.add(`on_right_click/${name}`, callback);
+    namespace.initialize(callbackId, callback);
   };
 });
 

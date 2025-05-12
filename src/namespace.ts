@@ -10,6 +10,7 @@ interface MemberMap {
 
 export default class Namespace {
   name: string;
+  private reserved: Map<string, Set<string>> = new Map();
   private members: Map<string, MemberMap> = new Map();
   private macros: Map<number, Set<string>> = new Map();
 
@@ -17,7 +18,59 @@ export default class Namespace {
     this.name = name;
   }
 
-  add<T extends Member>(name: string, member: T | Macro): Identifier<T> {
+  reserve<T extends Member, U extends unknown[]>(
+    path: string,
+    constructor: new (...a: U) => T,
+  ): Identifier<T> {
+    let set: Set<string>;
+    if (this.reserved.has(path)) {
+      set = this.reserved.get(constructor.name)!;
+    } else {
+      set = new Set();
+      this.reserved.set(constructor.name, set);
+    }
+
+    if (set.has(path)) {
+      error(`The member '${path}' is already defined.`);
+      Deno.exit(1);
+    }
+    set.add(path);
+
+    return new Identifier(this.name, path);
+  }
+
+  initialize<T extends Member>(identifier: Identifier<T>, member: T) {
+    const set = this.reserved.get(member.constructor.name);
+    if (
+      set == null ||
+      !set.delete(
+        identifier.path,
+      )
+    ) {
+      error(`The identifier '${identifier}' was not previously reserved.`);
+      Deno.exit(1);
+    }
+
+    let map;
+    if (this.members.has(member.constructor.name)) {
+      map = this.members.get(member.constructor.name)!.map;
+    } else {
+      map = new Map();
+      this.members.set(member.constructor.name, {
+        map,
+        fileExtension: member.fileExtension,
+        dataFolder: member.dataFolder,
+      });
+    }
+
+    if (map.has(identifier.path)) {
+      error(`The member '${identifier}' is already defined.`);
+      Deno.exit(1);
+    }
+    map.set(identifier.path, member);
+  }
+
+  add<T extends Member>(path: string, member: T | Macro): Identifier<T> {
     if (member instanceof Member) {
       let map;
       if (this.members.has(member.constructor.name)) {
@@ -31,13 +84,13 @@ export default class Namespace {
         });
       }
 
-      if (map.has(name)) {
-        error(`The member '${name}' is already defined.`);
+      if (map.has(path)) {
+        error(`The member '${path}' is already defined.`);
         Deno.exit(1);
       }
-      map.set(name, member);
+      map.set(path, member);
 
-      return new Identifier(`${this.name}:${name}`);
+      return new Identifier(this.name, path);
     } else {
       let set: Set<string>;
       if (this.macros.has(member.id)) {
@@ -47,17 +100,32 @@ export default class Namespace {
         this.macros.set(member.id, set);
       }
 
-      if (set.has(name)) {
-        error(`The member '${name}' is already defined.`);
+      if (set.has(path)) {
+        error(`The member '${path}' is already defined.`);
         Deno.exit(1);
       }
-      member.callback(this, name);
+      member.callback(this, path);
 
-      return new Identifier(`${this.name}:${name}`);
+      return new Identifier(this.name, path);
     }
   }
 
+  validate() {
+    this.reserved.values().forEach((set) => {
+      if (set.size !== 0) {
+        set.values().forEach((name) => {
+          error(
+            `The identifier ${this.name}:${name} was reserved, but never initialized`,
+          );
+        });
+        Deno.exit(1);
+      }
+    });
+  }
+
   async save(savePath: string) {
+    this.validate();
+
     await Deno.mkdir(savePath);
     await Promise.all(
       this.members.values().map(
@@ -94,14 +162,16 @@ export default class Namespace {
 }
 
 export class Identifier<_T extends Member> {
-  readonly value: string;
+  readonly namespace: string;
+  readonly path: string;
 
-  constructor(value: string) {
-    this.value = value;
+  constructor(namespace: string, path: string) {
+    this.namespace = namespace;
+    this.path = path;
   }
 
   toString() {
-    return this.value;
+    return `${this.namespace}:${this.path}`;
   }
 }
 
