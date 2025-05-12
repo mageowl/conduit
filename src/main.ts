@@ -2,7 +2,7 @@ import Namespace from "./namespace.ts";
 import * as path from "jsr:@std/path";
 import { error } from "./util.ts";
 
-export { JSONMember, Member } from "./namespace.ts";
+export { JSONMember, macro, Member } from "./namespace.ts";
 export type * from "./types.ts";
 export * as cmd from "./cmd.ts";
 export { default as ItemStack } from "./item.ts";

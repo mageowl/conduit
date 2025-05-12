@@ -1,9 +1,12 @@
 import { ItemStackJSON } from "../item.ts";
-import { JSONMember } from "../namespace.ts";
+import Namespace, { JSONMember } from "../namespace.ts";
 import { NBTValue } from "../types.ts";
 
-export default class Recipe<T extends { [char: string]: RecipeIngredient }>
-  extends JSONMember {
+export default class Recipe<
+  T extends { [char: string]: RecipeIngredient } = {
+    [char: string]: RecipeIngredient;
+  },
+> extends JSONMember {
   override readonly dataFolder = "recipe";
   data: RecipeDefinition<T>;
 
@@ -11,6 +14,8 @@ export default class Recipe<T extends { [char: string]: RecipeIngredient }>
     super();
     this.data = data;
   }
+
+  override add(_namespace: Namespace, _name: string): void {}
 
   override saveJSON(): NBTValue {
     return this.data;

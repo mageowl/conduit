@@ -29,7 +29,7 @@ Conduit is still in development.
 - [x] Macros
 - [ ] Resource types
   - [x] Functions
-    - [ ] All commands (3/~200)
+    - [ ] All commands (4/~200)
   - [x] Advancements
   - [x] Recipes
   - [ ] Predicates

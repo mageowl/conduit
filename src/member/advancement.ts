@@ -1,10 +1,12 @@
 import { TextJSON } from "../cmd/text.ts";
 import { ItemStackJSON } from "../item.ts";
-import { JSONMember } from "../namespace.ts";
+import Namespace, { JSONMember } from "../namespace.ts";
 import { NBTValue } from "../types.ts";
 
 export default class Advancement<
-  T extends { [name: string]: AdvancementCriteria },
+  T extends { [name: string]: AdvancementCriteria } = {
+    [name: string]: AdvancementCriteria;
+  },
 > extends JSONMember {
   override readonly dataFolder: string = "advancement";
   data: AdvancementDefinition<T>;
@@ -14,6 +16,8 @@ export default class Advancement<
 
     this.data = data;
   }
+
+  override add(_namespace: Namespace, _name: string): void {}
 
   override saveJSON(): NBTValue {
     return this.data;

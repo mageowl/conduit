@@ -1,5 +1,6 @@
 import * as path from "jsr:@std/path";
 import { NBTValue } from "./types.ts";
+import { error } from "./util.ts";
 
 interface MemberMap {
   map: Map<string, Member>;
@@ -10,12 +11,13 @@ interface MemberMap {
 export default class Namespace {
   name: string;
   private members: Map<string, MemberMap> = new Map();
+  private macros: Map<number, Set<string>> = new Map();
 
   constructor(name: string) {
     this.name = name;
   }
 
-  add(name: string, member: Member | Macro) {
+  add<T extends Member>(name: string, member: T | Macro): Identifier<T> {
     if (member instanceof Member) {
       let map;
       if (this.members.has(member.constructor.name)) {
@@ -30,19 +32,36 @@ export default class Namespace {
       }
 
       if (map.has(name)) {
-        throw new Error(`The member '${name}' is already defined.`);
+        error(`The member '${name}' is already defined.`);
+        Deno.exit(1);
       }
       map.set(name, member);
+
+      return new Identifier(`${this.name}:${name}`);
     } else {
-      member(name, this);
+      let set: Set<string>;
+      if (this.macros.has(member.id)) {
+        set = this.macros.get(member.id)!;
+      } else {
+        set = new Set();
+        this.macros.set(member.id, set);
+      }
+
+      if (set.has(name)) {
+        error(`The member '${name}' is already defined.`);
+        Deno.exit(1);
+      }
+      member.callback(this, name);
+
+      return new Identifier(`${this.name}:${name}`);
     }
   }
 
   async save(savePath: string) {
     await Deno.mkdir(savePath);
     await Promise.all(
-      this.members.entries().map(
-        async ([, { map, dataFolder, fileExtension }]) => {
+      this.members.values().map(
+        async ({ map, dataFolder, fileExtension }) => {
           const dataPath = path.join(
             savePath,
             dataFolder,
@@ -74,10 +93,42 @@ export default class Namespace {
   }
 }
 
+export class Identifier<_T extends Member> {
+  readonly value: string;
+
+  constructor(value: string) {
+    this.value = value;
+  }
+
+  toString() {
+    return this.value;
+  }
+}
+
+let macroId = 0;
+export function macro<T extends unknown[]>(
+  callback: (...args: T) => MacroCallback,
+): (...args: T) => Macro {
+  const id = macroId++;
+  return (...args) => new Macro(callback(...args), id);
+}
+
+type MacroCallback = (namespace: Namespace, name: string) => void;
+class Macro {
+  readonly callback: MacroCallback;
+  readonly id: number;
+
+  constructor(callback: MacroCallback, id: number) {
+    this.callback = callback;
+    this.id = id;
+  }
+}
+
 export abstract class Member {
   abstract readonly fileExtension: string;
   abstract readonly dataFolder: string;
 
+  abstract add(namespace: Namespace, name: string): void;
   abstract save(filePath: string): Promise<void>;
 }
 export abstract class JSONMember extends Member {
@@ -90,8 +141,3 @@ export abstract class JSONMember extends Member {
     file.write(encoder.encode(JSON.stringify(this.saveJSON())));
   }
 }
-
-export type Macro = (
-  name: string,
-  namespace: Namespace,
-) => void;

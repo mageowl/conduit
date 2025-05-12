@@ -1,24 +1,17 @@
 import * as conduit from "../src/main.ts";
-const { Selector, Pos, give, advancement, tellraw, particle } = conduit.cmd;
+const { Selector, Pos, give, advancement, tellraw, particle, Execute } =
+  conduit.cmd;
 
-export default function onRightClick(
+const rightClickHandler = conduit.macro(function (
   item: conduit.ItemStack,
   callback: conduit.Function,
-): conduit.Macro {
-  return (name, namespace) => {
+) {
+  return (namespace, name) => {
     if (item.components.consumable == null) {
       conduit.warning(
         `The right click handler "${namespace}:${name}" will not work because the item does not have a consumable component`,
       );
     }
-
-    callback.body.unshift(
-      advancement.revoke.only(
-        Selector.self(),
-        `${namespace}:on_right_click/${name}`,
-      ),
-    );
-    namespace.add(`on_right_click/${name}`, callback);
 
     const predicate: conduit.NBTObject = {};
     if (item.components.custom_data?.custom_id != null) {
@@ -28,8 +21,7 @@ export default function onRightClick(
     } else {
       predicate.components = item.components;
     }
-
-    namespace.add(
+    const trigger = namespace.add(
       `on_right_click/${name}`,
       new conduit.Advancement({
         criteria: {
@@ -45,8 +37,16 @@ export default function onRightClick(
         },
       }),
     );
+
+    callback.body.unshift(
+      advancement.revoke.only(
+        Selector.self(),
+        trigger,
+      ),
+    );
+    namespace.add(`on_right_click/${name}`, callback);
   };
-}
+});
 
 if (import.meta.main) {
   const pack = new conduit.Datapack({
@@ -76,15 +76,15 @@ if (import.meta.main) {
 
   namespace.add(
     "wand",
-    onRightClick(
+    rightClickHandler(
       rightClickWand,
       new conduit.Function([
         tellraw(Selector.self(), "Poof!"),
-        particle({
+        Execute.anchored("eyes").run(particle({
           id: "dust",
           color: [0.9, 0.7, 1.0],
           scale: 1,
-        }, Pos.rotLocal(0, 0, 1)),
+        }, Pos.rotLocal(0, 0, 1))),
       ]),
     ),
   );
