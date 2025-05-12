@@ -15,7 +15,7 @@ export type * from "./cmd/particle.ts";
 function advancementSubCommands(action: "grant" | "revoke") {
   const subCommand =
     (target: "from" | "through" | "until") =>
-    (selector: Selector, id: string) =>
+    (selector: Selector, id: Identifier<Advancement>) =>
       `advancement ${action} ${selector} ${target} ${id}`;
   return {
     only<T>(
