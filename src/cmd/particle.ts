@@ -1,5 +1,5 @@
-import { ItemStackJSON } from "../item.ts";
-import { NBTObject } from "../types.ts";
+import Item from "../item.ts";
+import { JSONObject } from "../serialize.ts";
 
 export interface BlockStateParticle {
   id:
@@ -10,7 +10,7 @@ export interface BlockStateParticle {
     | "falling_dust";
   block_state: {
     Name: string;
-    Properties: NBTObject;
+    Properties: JSONObject;
   } | string;
 }
 export interface DustParticle {
@@ -30,7 +30,7 @@ export interface EntityEffectParticle {
 }
 export interface ItemParticle {
   id: "item";
-  item: Omit<ItemStackJSON, "count">;
+  item: Item;
 }
 export interface SculkChargeParticle {
   id: "sculk_charge";

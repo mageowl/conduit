@@ -1,5 +1,5 @@
 import * as path from "jsr:@std/path";
-import { NBTValue } from "./types.ts";
+import { JSONValue, Serialize } from "./serialize.ts";
 import { error } from "./util.ts";
 
 interface MemberMap {
@@ -115,7 +115,7 @@ export default class Namespace {
       if (set.size !== 0) {
         set.values().forEach((name) => {
           error(
-            `The identifier ${this.name}:${name} was reserved, but never initialized`,
+            `The identifier '${this.name}:${name}' was reserved, but never initialized`,
           );
         });
         Deno.exit(1);
@@ -161,7 +161,7 @@ export default class Namespace {
   }
 }
 
-export class Identifier<_T extends Member> {
+export class Identifier<_T extends Member> implements Serialize {
   readonly namespace: string;
   readonly path: string;
 
@@ -172,6 +172,9 @@ export class Identifier<_T extends Member> {
 
   toString() {
     return `${this.namespace}:${this.path}`;
+  }
+  serialize(): JSONValue {
+    return this.toString();
   }
 }
 
@@ -204,7 +207,7 @@ export abstract class Member {
 export abstract class JSONMember extends Member {
   override readonly fileExtension = "json";
 
-  abstract saveJSON(): NBTValue;
+  abstract saveJSON(): JSONValue;
   override async save(filePath: string) {
     const encoder = new TextEncoder();
     const file = await Deno.create(filePath);

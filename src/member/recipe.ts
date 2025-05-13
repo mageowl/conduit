@@ -1,6 +1,6 @@
-import { ItemStackJSON } from "../item.ts";
+import Item, { ItemStack } from "../item.ts";
 import Namespace, { JSONMember } from "../namespace.ts";
-import { NBTValue } from "../types.ts";
+import { JSONValue, serialize } from "../serialize.ts";
 
 export default class Recipe<
   T extends { [char: string]: RecipeIngredient } = {
@@ -17,8 +17,8 @@ export default class Recipe<
 
   override add(_namespace: Namespace, _name: string): void {}
 
-  override saveJSON(): NBTValue {
-    return this.data;
+  override saveJSON(): JSONValue {
+    return serialize(this.data);
   }
 }
 
@@ -44,14 +44,15 @@ type BlastingRecipe = {
   group?: string;
   ingredient: RecipeIngredient;
   cookingtime?: number;
-  result: ItemStackJSON;
+  result: Item;
   experience?: number;
 };
+
 type CampfireCookingRecipe = {
   type: "campfire_cooking";
   ingredient: RecipeIngredient;
   cookingtime?: number;
-  result: ItemStackJSON;
+  result: Item;
 };
 
 type CraftingRecipeCategory = "equipment" | "building" | "misc" | "redstone";
@@ -89,7 +90,7 @@ type CraftingShapedRecipe<T extends { [char: string]: RecipeIngredient }> = {
   group?: string;
   pattern: ShapedRecipePattern<T>;
   key: T;
-  result: ItemStackJSON;
+  result: ItemStack | Item;
 };
 
 type CraftingShapelessRecipe = {
@@ -97,7 +98,7 @@ type CraftingShapelessRecipe = {
   category?: CraftingRecipeCategory;
   group?: string;
   ingredients: RecipeIngredient[];
-  result: ItemStackJSON;
+  result: ItemStack | Item;
 };
 
 type CraftingTransmuteRecipe = {
@@ -136,7 +137,7 @@ type SmeltingRecipe = {
   group?: string;
   ingredient: RecipeIngredient;
   cookingtime?: number;
-  result: ItemStackJSON;
+  result: Item;
   experience?: number;
 };
 
@@ -145,7 +146,7 @@ type SmithingTransformRecipe = {
   template: RecipeIngredient;
   base: RecipeIngredient;
   addition: RecipeIngredient;
-  result: ItemStackJSON;
+  result: ItemStack | Item;
 };
 
 type SmithingTrimRecipe = {
@@ -160,12 +161,12 @@ type SmokingRecipe = {
   group?: string;
   ingredient: RecipeIngredient;
   cookingtime?: number;
-  result: ItemStackJSON;
+  result: Item;
   experience?: number;
 };
 
 type StonecuttingRecipe = {
   type: "stonecutting";
   ingredient: RecipeIngredient;
-  result: ItemStackJSON;
+  result: ItemStack | Item;
 };

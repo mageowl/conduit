@@ -1,7 +1,8 @@
 import { TextJSON } from "../cmd/text.ts";
-import { ItemStackJSON } from "../item.ts";
-import Namespace, { JSONMember } from "../namespace.ts";
-import { NBTValue } from "../types.ts";
+import Item from "../item.ts";
+import Namespace, { Identifier, JSONMember } from "../namespace.ts";
+import { JSONValue, serialize } from "../serialize.ts";
+import Function from "./function.ts";
 
 export default class Advancement<
   T extends { [name: string]: AdvancementCriteria } = {
@@ -19,8 +20,8 @@ export default class Advancement<
 
   override add(_namespace: Namespace, _name: string): void {}
 
-  override saveJSON(): NBTValue {
-    return this.data;
+  override saveJSON(): JSONValue {
+    return serialize(this.data);
   }
 }
 
@@ -35,11 +36,11 @@ type AdvancementDefinition<
     experience?: number;
     recipes?: string[];
     loot?: string[];
-    function?: string;
+    function?: Identifier<Function>;
   };
 };
 type AdvancementDisplay = {
-  icon: ItemStackJSON;
+  icon: Item;
   title: TextJSON;
   description: TextJSON;
   frame?: "challenge" | "goal" | "task";
@@ -52,5 +53,5 @@ type AdvancementDisplay = {
 // TODO: Implement seperate type for each criteria
 type AdvancementCriteria = {
   trigger: string;
-  conditions?: { [key: string]: NBTValue };
+  conditions?: { [key: string]: JSONValue };
 };

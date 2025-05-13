@@ -1,4 +1,4 @@
-import { NBTObject, NBTValue } from "./types.ts";
+import { JSONObject, JSONValue } from "./serialize.ts";
 
 export type ConsumeEffectApplyEffects = {
   type: "apply_effects";
@@ -30,7 +30,7 @@ export type ConsumeEffectPlaySound = {
 };
 export type ConsumeEffect = ConsumeEffectApplyEffects;
 
-export interface Components extends NBTObject {
+export interface Components extends JSONObject {
   consumable?: {
     consume_seconds?: number;
     animation?:
@@ -48,8 +48,8 @@ export interface Components extends NBTObject {
     has_consume_particles?: boolean;
     on_consume_effects?: ConsumeEffect[];
   };
-  custom_data?: { [key: string]: NBTValue };
+  custom_data?: { [key: string]: JSONValue };
 
   // Extra components that we might not know about.
-  [name: string]: NBTValue | undefined;
+  [name: string]: JSONValue | undefined;
 }

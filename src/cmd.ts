@@ -2,15 +2,13 @@ import { Particle } from "./cmd/particle.ts";
 import { Pos } from "./cmd/pos.ts";
 import Selector from "./cmd/selector.ts";
 import { IntoText, Text } from "./cmd/text.ts";
-import ItemStack from "./item.ts";
+import Item from "./item.ts";
 import { Advancement } from "./main.ts";
 import { Identifier } from "./namespace.ts";
 
 export { default as Selector } from "./cmd/selector.ts";
 export { Pos, Rot } from "./cmd/pos.ts";
 export { Text } from "./cmd/text.ts";
-export type * from "./cmd/text.ts";
-export type * from "./cmd/particle.ts";
 
 function advancementSubCommands(action: "grant" | "revoke") {
   const subCommand =
@@ -42,7 +40,7 @@ export const advancement = {
 
 export { default as Execute } from "./cmd/execute.ts";
 
-export function give(selector: Selector, item: ItemStack, count = 1) {
+export function give(selector: Selector, item: Item, count = 1) {
   return `give ${selector} ${item} ${count}`;
 }
 

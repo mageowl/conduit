@@ -1,14 +1,22 @@
 import { Components } from "./itemComponents.ts";
+import { Serialize } from "./serialize.ts";
 
-export default class ItemStack {
+export default class Item implements Serialize {
   id: string;
   components: Components;
 
   constructor(
-    { id, components = {} }: { id: string; components?: Components },
+    { id, components = {} }: {
+      id: string;
+      components?: Components;
+    },
   ) {
     this.id = id;
     this.components = components;
+  }
+
+  count(count: number): ItemStack {
+    return new ItemStack(this, count);
   }
 
   toString() {
@@ -18,7 +26,7 @@ export default class ItemStack {
     });
     return `${this.id}[${components.join(",")}]`;
   }
-  toJSON(): ItemStackJSON {
+  serialize() {
     return {
       id: this.id,
       components: this.components,
@@ -26,8 +34,22 @@ export default class ItemStack {
   }
 }
 
-export type ItemStackJSON = {
-  id: string;
-  components?: Components;
-  count?: number;
-};
+export class ItemStack implements Serialize {
+  item: Item;
+  count: number;
+
+  constructor(
+    item: Item,
+    count: number,
+  ) {
+    this.item = item;
+    this.count = count;
+  }
+
+  serialize() {
+    return {
+      ...this.item.serialize(),
+      count: this.count,
+    };
+  }
+}

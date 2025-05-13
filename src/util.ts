@@ -12,3 +12,16 @@ export function warning(message: string) {
     "color:unset;font-weight:unset;",
   );
 }
+
+export function mapEntries<O extends object, R>(
+  object: O,
+  callback: (key: keyof O, value: O[keyof O]) => R,
+): { [Key in keyof O]: R } {
+  const out = <{ [Key in keyof O]: R }> {};
+  for (const key in object) {
+    if (Object.hasOwn(object, key)) {
+      out[key] = callback(key, object[key]);
+    }
+  }
+  return out;
+}

@@ -3,7 +3,7 @@ const { Selector, Pos, give, advancement, tellraw, particle, Execute } =
   conduit.cmd;
 
 const rightClickHandler = conduit.macro(function (
-  item: conduit.ItemStack,
+  item: conduit.Item,
   callback: conduit.Function,
 ) {
   return (namespace, name) => {
@@ -18,7 +18,7 @@ const rightClickHandler = conduit.macro(function (
       conduit.Function,
     );
 
-    const predicate: conduit.NBTObject = {};
+    const predicate: conduit.JSONObject = {};
     if (item.components.custom_data?.custom_id != null) {
       predicate.predicates = {
         custom_data: { custom_id: item.components.custom_data.custom_id },
@@ -38,7 +38,7 @@ const rightClickHandler = conduit.macro(function (
           },
         },
         rewards: {
-          function: callbackId.toString(),
+          function: callbackId,
         },
       }),
     );
@@ -60,7 +60,7 @@ if (import.meta.main) {
   });
 
   const namespace = pack.namespace("right_click");
-  const rightClickWand = new conduit.ItemStack({
+  const rightClickWand = new conduit.Item({
     id: "stick",
     components: {
       custom_data: {
