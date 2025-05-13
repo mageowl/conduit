@@ -1,4 +1,4 @@
-import * as conduit from "conduit";
+import * as conduit from "@mageowl/conduit";
 const { tellraw, Selector } = conduit.cmd;
 
 const pack = new conduit.Datapack({

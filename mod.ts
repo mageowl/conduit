@@ -7,5 +7,6 @@ export { default as Item } from "./src/item.ts";
 export { default as Function } from "./src/member/function.ts";
 export { default as Advancement } from "./src/member/advancement.ts";
 export { default as Recipe } from "./src/member/recipe.ts";
+export { default as Include } from "./src/member/include.ts";
 
 export { error, warning } from "./src/util.ts";

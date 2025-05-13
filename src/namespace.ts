@@ -1,6 +1,7 @@
 import * as path from "@std/path";
 import type { JSONValue, Serialize } from "./serialize.ts";
 import { error } from "./util.ts";
+import Include from "./member/file.ts";
 
 interface MemberMap {
   map: Map<string, Member>;
@@ -128,9 +129,9 @@ export default class Namespace {
 
     await Deno.mkdir(savePath);
     await Promise.all(
-      this.members.values().map(
-        async ({ map, dataFolder, fileExtension }) => {
-          const dataPath = path.join(
+      this.members.entries().map(
+        async ([kind, { map, dataFolder, fileExtension }]) => {
+          const dataPath = kind === "Include" ? savePath : path.join(
             savePath,
             dataFolder,
           );
@@ -146,8 +147,10 @@ export default class Namespace {
                 });
               }
 
-              const filePath = path.join(dataPath, name) +
-                `.${fileExtension}`;
+              const filePath = member instanceof Include
+                ? path.join(member.folder, name) + path.extname(member.fromPath)
+                : (path.join(dataPath, name) +
+                  `.${fileExtension}`);
               await member.save(filePath);
             }),
           );

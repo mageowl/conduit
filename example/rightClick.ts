@@ -1,4 +1,4 @@
-import * as conduit from "conduit";
+import * as conduit from "@mageowl/conduit";
 const { Selector, Pos, give, advancement, tellraw, particle, Execute } =
   conduit.cmd;
 
