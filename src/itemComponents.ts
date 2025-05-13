@@ -1,4 +1,4 @@
-import { JSONObject, JSONValue } from "./serialize.ts";
+import type { JSONObject, JSONValue } from "./serialize.ts";
 
 export type ConsumeEffectApplyEffects = {
   type: "apply_effects";

@@ -18,7 +18,11 @@ export interface Serialize {
   serialize(): JSONValue;
 }
 
-type Serializable = JSONValue | { [member: string]: Serializable } | Serialize;
+type Serializable =
+  | JSONValue
+  | { [member: string]: Serializable }
+  | Serialize[]
+  | Serialize;
 export function serialize(value: Serializable): JSONValue {
   if (
     value == null ||

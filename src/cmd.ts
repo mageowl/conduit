@@ -2,7 +2,8 @@ import type { Particle } from "./cmd/particle.ts";
 import type Selector from "./cmd/selector.ts";
 import Item from "./item.ts";
 import type Advancement from "./member/advancement.ts";
-import type { Identifier } from "./namespace.ts";
+import type Function from "./member/function.ts";
+import type { Identifier } from "./member.ts";
 import { type IntoText, Text } from "./cmd/text.ts";
 import { Pos } from "./cmd/pos.ts";
 import type { ItemStack } from "./item.ts";
@@ -58,6 +59,10 @@ export const advancement: AdvancementCommand = {
   grant: advancementSubCommands("grant"),
 };
 
+export function call(func: Identifier<Function>): string {
+  return `function ${func}`;
+}
+
 export { default as Execute } from "./cmd/execute.ts";
 
 export function give(selector: Selector, stack: Item | ItemStack): string {
@@ -87,6 +92,8 @@ export function particle(
 
   return `particle ${particleString} ${pos}`;
 }
+
+export { scoreboard } from "./cmd/scoreboard.ts";
 
 export function tellraw(selector: Selector, message: IntoText): string {
   const text = Text.from(message);

@@ -6,8 +6,10 @@ import * as conduit from "conduit";
 const { tellraw, Selector } = conduit.cmd;
 
 const pack = new conduit.Datapack({
-  minecraftVersion: "1.21.5",
   description: "Test datapack",
+  dependencies: {
+    minecraft: "1.21.5",
+  },
 });
 
 const namespace = pack.namespace("test");

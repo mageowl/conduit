@@ -1,5 +1,5 @@
-import Item from "../item.ts";
-import { JSONObject } from "../serialize.ts";
+import type Item from "../item.ts";
+import type { JSONObject } from "../serialize.ts";
 
 export interface BlockStateParticle {
   id:

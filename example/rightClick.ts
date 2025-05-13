@@ -2,7 +2,7 @@ import * as conduit from "@mageowl/conduit";
 const { Selector, Pos, give, advancement, tellraw, particle, Execute } =
   conduit.cmd;
 
-const rightClickHandler = conduit.macro(function (
+export const rightClickHandler = conduit.macro(function (
   item: conduit.Item,
   callback: conduit.Function,
 ) {
@@ -55,8 +55,8 @@ const rightClickHandler = conduit.macro(function (
 
 if (import.meta.main) {
   const pack = new conduit.Datapack({
-    minecraftVersion: "1.21.5",
     description: "Test datapack",
+    minecraft: "1.21.5",
   });
 
   const namespace = pack.namespace("right_click");

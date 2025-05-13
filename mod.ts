@@ -1,5 +1,5 @@
 export { default as Datapack } from "./src/datapack.ts";
-export { JSONMember, macro, Member } from "./src/namespace.ts";
+export { JSONMember, macro, Member } from "./src/member.ts";
 export type * from "./src/types.ts";
 export * as cmd from "./src/cmd.ts";
 export { default as Item } from "./src/item.ts";

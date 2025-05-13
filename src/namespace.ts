@@ -1,7 +1,9 @@
 import * as path from "@std/path";
-import type { JSONValue, Serialize } from "./serialize.ts";
+import { Identifier, type Macro, Member, type MemberType } from "./member.ts";
+
 import { error } from "./util.ts";
-import Include from "./member/file.ts";
+import Include from "./member/include.ts";
+import Tag from "./tag.ts";
 
 interface MemberMap {
   map: Map<string, Member>;
@@ -14,6 +16,10 @@ export default class Namespace {
   private reserved: Map<string, Set<string>> = new Map();
   private members: Map<string, MemberMap> = new Map();
   private macros: Map<number, Set<string>> = new Map();
+  private tags: Map<
+    MemberType,
+    Map<string, Tag<Member>>
+  > = new Map();
 
   constructor(name: string) {
     this.name = name;
@@ -21,7 +27,7 @@ export default class Namespace {
 
   reserve<T extends Member, U extends unknown[]>(
     path: string,
-    constructor: new (...a: U) => T,
+    constructor: new (...args: U) => T,
   ): Identifier<T> {
     let set: Set<string>;
     if (this.reserved.has(path)) {
@@ -111,6 +117,27 @@ export default class Namespace {
     }
   }
 
+  tag<T extends Member>(
+    name: string,
+    constructor: MemberType<T>,
+  ): Tag<T> {
+    let map;
+    if (this.tags.has(constructor)) {
+      map = this.tags.get(constructor)!;
+    } else {
+      map = new Map();
+      this.tags.set(constructor, map);
+    }
+
+    if (map.has(name)) {
+      return map.get(name)!;
+    } else {
+      const tag = new Tag<T>(new Identifier<Tag<T>>(this.name, name));
+      map.set(name, tag);
+      return tag;
+    }
+  }
+
   validate() {
     this.reserved.values().forEach((set) => {
       if (set.size !== 0) {
@@ -157,63 +184,38 @@ export default class Namespace {
         },
       ),
     );
+
+    if (this.tags.size > 0) {
+      await Deno.mkdir(path.join(savePath, "tags"));
+      await Promise.all(
+        this.tags.entries().map(async ([constructor, map]) => {
+          const dataPath = path.join(savePath, "tags", constructor.dataFolder);
+          const foldersCreated = [""];
+          await Deno.mkdir(dataPath);
+
+          await Promise.all(
+            map.entries().map(async ([name, tag]) => {
+              const dirname = path.dirname(name);
+              if (!foldersCreated.includes(dirname)) {
+                await Deno.mkdir(path.join(dataPath, dirname), {
+                  recursive: true,
+                });
+              }
+
+              const file = await Deno.create(
+                path.join(dataPath, name) + ".json",
+              );
+              const encoder = new TextEncoder();
+              const bytes = encoder.encode(JSON.stringify(tag.serialize()));
+              await file.write(bytes);
+            }),
+          );
+        }),
+      );
+    }
   }
 
   toString(): string {
     return this.name;
-  }
-}
-
-export class Identifier<_T extends Member> implements Serialize {
-  readonly namespace: string;
-  readonly path: string;
-
-  constructor(namespace: string, path: string) {
-    this.namespace = namespace;
-    this.path = path;
-  }
-
-  toString(): string {
-    return `${this.namespace}:${this.path}`;
-  }
-  serialize(): JSONValue {
-    return this.toString();
-  }
-}
-
-let macroId = 0;
-export function macro<T extends unknown[]>(
-  callback: (...args: T) => MacroCallback,
-): (...args: T) => Macro {
-  const id = macroId++;
-  return (...args) => new Macro(callback(...args), id);
-}
-
-type MacroCallback = (namespace: Namespace, name: string) => void;
-class Macro {
-  readonly callback: MacroCallback;
-  readonly id: number;
-
-  constructor(callback: MacroCallback, id: number) {
-    this.callback = callback;
-    this.id = id;
-  }
-}
-
-export abstract class Member {
-  abstract readonly fileExtension: string;
-  abstract readonly dataFolder: string;
-
-  abstract add(namespace: Namespace, name: string): void;
-  abstract save(filePath: string): Promise<void>;
-}
-export abstract class JSONMember extends Member {
-  override readonly fileExtension = "json";
-
-  abstract saveJSON(): JSONValue;
-  override async save(filePath: string) {
-    const encoder = new TextEncoder();
-    const file = await Deno.create(filePath);
-    file.write(encoder.encode(JSON.stringify(this.saveJSON())));
   }
 }

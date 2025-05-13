@@ -1,8 +1,9 @@
-import Namespace, { Member } from "../namespace.ts";
+import type Namespace from "../namespace.ts";
+import { Member } from "../member.ts";
 
 export default class Function extends Member {
-  override readonly fileExtension = "mcfunction";
-  override readonly dataFolder = "function";
+  static override readonly fileExtension = "mcfunction";
+  static override readonly dataFolder = "function";
 
   body: string[];
 
@@ -11,7 +12,7 @@ export default class Function extends Member {
     this.body = body.map((line) => line.replaceAll("\n", ""));
   }
 
-  override add(namespace: Namespace, name: string): void {}
+  override add(_namespace: Namespace, _name: string): void {}
 
   override async save(filePath: string) {
     const encoder = new TextEncoder();

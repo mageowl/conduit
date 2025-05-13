@@ -1,5 +1,11 @@
-export type { MinecraftVersion, PackMetadata } from "./datapack.ts";
-export type { default as Namespace, Identifier } from "./namespace.ts";
+export type {
+  MinecraftVersion,
+  PackageSpecifier,
+  PackMetadata,
+  Version,
+} from "./datapack.ts";
+export type { default as Namespace } from "./namespace.ts";
+export type { Identifier } from "./member.ts";
 export type * as cmd from "./cmd/types.ts";
 export type * as component from "./itemComponents.ts";
 export type { Components } from "./itemComponents.ts";

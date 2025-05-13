@@ -1,6 +1,6 @@
 import type { Text } from "../cmd/text.ts";
 import type Item from "../item.ts";
-import { type Identifier, JSONMember } from "../namespace.ts";
+import { type Identifier, JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
 import { type JSONValue, serialize } from "../serialize.ts";
 import type Function from "./function.ts";
@@ -10,7 +10,7 @@ export default class Advancement<
     [name: string]: AdvancementCriteria;
   },
 > extends JSONMember {
-  override readonly dataFolder: string = "advancement";
+  static override readonly dataFolder: string = "advancement";
   data: AdvancementDefinition<T>;
 
   constructor(data: AdvancementDefinition<T>) {

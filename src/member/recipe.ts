@@ -1,13 +1,14 @@
-import Item, { ItemStack } from "../item.ts";
-import Namespace, { JSONMember } from "../namespace.ts";
-import { JSONValue, serialize } from "../serialize.ts";
+import type { default as Item, ItemStack } from "../item.ts";
+import type Namespace from "../namespace.ts";
+import { JSONMember } from "../member.ts";
+import { type JSONValue, serialize } from "../serialize.ts";
 
 export default class Recipe<
   T extends { [char: string]: RecipeIngredient } = {
     [char: string]: RecipeIngredient;
   },
 > extends JSONMember {
-  override readonly dataFolder = "recipe";
+  static override readonly dataFolder = "recipe";
   data: RecipeDefinition<T>;
 
   constructor(data: RecipeDefinition<T>) {
