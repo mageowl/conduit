@@ -1,4 +1,4 @@
-import * as conduit from "../src/main.ts";
+import * as conduit from "conduit";
 const { tellraw, Selector } = conduit.cmd;
 
 const pack = new conduit.Datapack({

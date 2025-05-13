@@ -1,5 +1,5 @@
-import { Pos, Rot } from "./pos.ts";
-import Selector from "./selector.ts";
+import { Pos, type Rot } from "./pos.ts";
+import type Selector from "./selector.ts";
 
 export type Axes = `${"x" | ""}${"y" | ""}${"z" | ""}`;
 export type ExecuteRelation =
@@ -20,41 +20,41 @@ type ExecuteHeightMap =
 export default class Execute {
   instructions: string[] = [];
 
-  align(axes: Axes) {
+  align(axes: Axes): this {
     this.instructions.push(`align ${axes}`);
     return this;
   }
-  static align(axes: Axes) {
+  static align(axes: Axes): Execute {
     return new Execute().align(axes);
   }
 
-  anchored(anchor: "eyes" | "feet") {
+  anchored(anchor: "eyes" | "feet"): this {
     this.instructions.push(`anchored ${anchor}`);
     return this;
   }
-  static anchored(anchor: "eyes" | "feet") {
+  static anchored(anchor: "eyes" | "feet"): Execute {
     return new Execute().anchored(anchor);
   }
 
-  as(selector: Selector) {
+  as(selector: Selector): this {
     this.instructions.push(`as ${selector}`);
     return this;
   }
-  static as(selector: Selector) {
+  static as(selector: Selector): Execute {
     return new Execute().as(selector);
   }
 
-  at(pos: Pos) {
+  at(pos: Pos): this {
     this.instructions.push(`at ${pos}`);
     return this;
   }
-  static at(pos: Pos) {
+  static at(pos: Pos): Execute {
     return new Execute().at(pos);
   }
 
-  facing(target: Selector, anchor: "eyes" | "feet"): Execute;
-  facing(target: Pos): Execute;
-  facing(target: Selector | Pos, anchor?: "eyes" | "feet") {
+  facing(target: Selector, anchor: "eyes" | "feet"): this;
+  facing(target: Pos): this;
+  facing(target: Selector | Pos, anchor?: "eyes" | "feet"): this {
     this.instructions.push(
       target instanceof Pos
         ? `facing ${target}`
@@ -64,7 +64,7 @@ export default class Execute {
   }
   static facing(target: Selector, anchor: "eyes" | "feet"): Execute;
   static facing(target: Pos): Execute;
-  static facing(target: Selector | Pos, anchor?: "eyes" | "feet") {
+  static facing(target: Selector | Pos, anchor?: "eyes" | "feet"): Execute {
     const self = new Execute();
     self.instructions.push(
       target instanceof Pos
@@ -74,90 +74,91 @@ export default class Execute {
     return self;
   }
 
-  in(dimension: string) {
+  in(dimension: string): this {
     this.instructions.push(`in ${dimension}`);
     return this;
   }
-  static in(dimension: string) {
+  static in(dimension: string): Execute {
     return new Execute().in(dimension);
   }
 
-  on(relation: ExecuteRelation) {
+  on(relation: ExecuteRelation): this {
     this.instructions.push(`on ${relation}`);
     return this;
   }
-  static on(relation: ExecuteRelation) {
+  static on(relation: ExecuteRelation): Execute {
     return new Execute().on(relation);
   }
 
-  positioned(pos: Pos) {
+  positioned(pos: Pos): this {
     this.instructions.push(`positioned ${pos}`);
     return this;
   }
-  static positioned(pos: Pos) {
+  static positioned(pos: Pos): Execute {
     return new Execute().positioned(pos);
   }
 
-  positionedAs(selector: Selector) {
+  positionedAs(selector: Selector): this {
     this.instructions.push(`postioned as ${selector}`);
     return this;
   }
-  static positionedAs(selector: Selector) {
+  static positionedAs(selector: Selector): Execute {
     return new Execute().positionedAs(selector);
   }
 
   positionedOver(
     heightMap: ExecuteHeightMap,
-  ) {
+  ): this {
     this.instructions.push(`positioned over ${heightMap}`);
+    return this;
   }
   static positionedOver(
     heightMap: ExecuteHeightMap,
-  ) {
+  ): Execute {
     return new Execute().positionedOver(heightMap);
   }
 
-  rotated(rotation: Rot) {
+  rotated(rotation: Rot): this {
     this.instructions.push(`rotated ${rotation}`);
     return this;
   }
-  static rotated(rotation: Rot) {
+  static rotated(rotation: Rot): Execute {
     return new Execute().rotated(rotation);
   }
 
-  rotatedAs(selector: Selector) {
+  rotatedAs(selector: Selector): this {
     this.instructions.push(`rotated as ${selector}`);
     return this;
   }
-  static rotatedAs(selector: Selector) {
+  static rotatedAs(selector: Selector): Execute {
     return new Execute().rotatedAs(selector);
   }
 
-  store(value: ExecuteStoreValue) {
+  store(value: ExecuteStoreValue): ExecuteStore {
     return new ExecuteStore(this, value);
   }
-  static store(value: ExecuteStoreValue) {
+  static store(value: ExecuteStoreValue): ExecuteStore {
     return new ExecuteStore(new Execute(), value);
   }
 
-  summon(entity: string) {
+  summon(entity: string): this {
     this.instructions.push(`summon ${entity}`);
     return this;
   }
-  static summon(entity: string) {
+  static summon(entity: string): Execute {
     return new Execute().summon(entity);
   }
 
-  if() {
+  if(): ExecuteCondition {
     return new ExecuteCondition(this, false);
   }
-  static if() {
+  static if(): ExecuteCondition {
     return new ExecuteCondition(new Execute(), false);
   }
-  unless() {
+  unless(): ExecuteCondition {
     return new ExecuteCondition(this, true);
   }
-  static unless() {
+  static unless(): ExecuteCondition {
     return new ExecuteCondition(new Execute(), true);
   }
 
@@ -182,13 +183,13 @@ export class ExecuteStore {
     path: string,
     type: ExecuteStoreType,
     scale: number = 1,
-  ) {
+  ): Execute {
     this.parent.instructions.push(
       `store ${this.value} block ${pos} ${path} ${type} ${scale}`,
     );
     return this.parent;
   }
-  bossbar(id: string, property: "max" | "value") {
+  bossbar(id: string, property: "max" | "value"): Execute {
     this.parent.instructions.push(
       `store ${this.value} bossbar ${id} ${property}`,
     );
@@ -199,22 +200,24 @@ export class ExecuteStore {
     path: string,
     type: ExecuteStoreType,
     scale: number = 1,
-  ) {
+  ): Execute {
     this.parent.instructions.push(
       `store ${this.value} entity ${selector} ${path} ${type} ${scale}`,
     );
+    return this.parent;
   }
-  score(target: string | "*", objective: string) {
+  score(target: string | "*", objective: string): Execute {
     this.parent.instructions.push(
       `store ${this.value} score ${target} ${objective}`,
     );
+    return this.parent;
   }
   storage(
     target: string,
     path: string,
     type: ExecuteStoreType,
     scale: number = 1,
-  ) {
+  ): Execute {
     this.parent.instructions.push(
       `store ${this.value} storage ${target} ${path} ${type} ${scale}`,
     );
@@ -233,16 +236,16 @@ export class ExecuteCondition {
     this.invert = invert;
   }
 
-  get mode() {
+  get mode(): "if" | "unless" {
     return this.invert ? "if" : "unless";
   }
 
-  biome(pos: Pos, biome: string) {
+  biome(pos: Pos, biome: string): Execute {
     this.parent.instructions.push(`${this.mode} biome ${pos} ${biome}`);
     return this.parent;
   }
 
-  block(pos: Pos, blockState: string) {
+  block(pos: Pos, blockState: string): Execute {
     this.parent.instructions.push(`${this.mode} block ${pos} ${blockState}`);
     return this.parent;
   }
@@ -252,7 +255,7 @@ export class ExecuteCondition {
     sourceEnd: Pos,
     destination: Pos,
     ignoreAir = false,
-  ) {
+  ): Execute {
     this.parent.instructions.push(
       `${this.mode} blocks ${sourceStart} ${sourceEnd} ${destination} ${
         ignoreAir ? "masked" : "all"
@@ -261,51 +264,51 @@ export class ExecuteCondition {
     return this.parent;
   }
 
-  blockData(pos: Pos, path: string) {
+  blockData(pos: Pos, path: string): Execute {
     this.parent.instructions.push(`${this.mode} data block ${pos} ${path}`);
     return this.parent;
   }
-  entityData(selector: Selector, path: string) {
+  entityData(selector: Selector, path: string): Execute {
     this.parent.instructions.push(
       `${this.mode} data entity ${selector} ${path}`,
     );
     return this.parent;
   }
-  storageData(id: string, path: string) {
+  storageData(id: string, path: string): Execute {
     this.parent.instructions.push(`${this.mode} data storage ${id} ${path}`);
     return this.parent;
   }
 
-  inDimension(id: string) {
+  inDimension(id: string): Execute {
     this.parent.instructions.push(`${this.mode} dimension ${id}`);
     return this.parent;
   }
 
-  entity(selector: Selector) {
+  entity(selector: Selector): Execute {
     this.parent.instructions.push(`${this.mode} entity ${selector}`);
     return this.parent;
   }
 
-  mcFunction(id: string) {
+  mcFunction(id: string): Execute {
     this.parent.instructions.push(`${this.mode} function ${id}`);
     return this.parent;
   }
 
   // TODO: Custom predicate type
-  items(source: Pos | Selector, slot: string, predicate: string) {
+  items(source: Pos | Selector, slot: string, predicate: string): Execute {
     this.parent.instructions.push(
       `${this.mode} items ${source} ${slot} ${predicate}`,
     );
     return this.parent;
   }
 
-  chunkLoaded(pos: Pos) {
+  chunkLoaded(pos: Pos): Execute {
     this.parent.instructions.push(`${this.mode} loaded ${pos}`);
     return this.parent;
   }
 
   // TODO: Inline definition
-  predicate(id: string) {
+  predicate(id: string): Execute {
     this.parent.instructions.push(`${this.mode} predicate ${id}`);
     return this.parent;
   }

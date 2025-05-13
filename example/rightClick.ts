@@ -1,4 +1,4 @@
-import * as conduit from "../src/main.ts";
+import * as conduit from "conduit";
 const { Selector, Pos, give, advancement, tellraw, particle, Execute } =
   conduit.cmd;
 
@@ -106,7 +106,7 @@ if (import.meta.main) {
       key: {
         A: "resin_clump",
       },
-      result: rightClickWand.toJSON(),
+      result: rightClickWand,
     }),
   );
 

@@ -1,5 +1,5 @@
-import * as path from "jsr:@std/path";
-import { JSONValue, Serialize } from "./serialize.ts";
+import * as path from "@std/path";
+import type { JSONValue, Serialize } from "./serialize.ts";
 import { error } from "./util.ts";
 
 interface MemberMap {
@@ -156,7 +156,7 @@ export default class Namespace {
     );
   }
 
-  toString() {
+  toString(): string {
     return this.name;
   }
 }
@@ -170,7 +170,7 @@ export class Identifier<_T extends Member> implements Serialize {
     this.path = path;
   }
 
-  toString() {
+  toString(): string {
     return `${this.namespace}:${this.path}`;
   }
   serialize(): JSONValue {

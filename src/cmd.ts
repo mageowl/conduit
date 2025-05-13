@@ -1,16 +1,36 @@
-import { Particle } from "./cmd/particle.ts";
-import { Pos } from "./cmd/pos.ts";
-import Selector from "./cmd/selector.ts";
-import { IntoText, Text } from "./cmd/text.ts";
+import type { Particle } from "./cmd/particle.ts";
+import type Selector from "./cmd/selector.ts";
 import Item from "./item.ts";
-import { Advancement } from "./main.ts";
-import { Identifier } from "./namespace.ts";
+import type Advancement from "./member/advancement.ts";
+import type { Identifier } from "./namespace.ts";
+import { type IntoText, Text } from "./cmd/text.ts";
+import { Pos } from "./cmd/pos.ts";
+import type { ItemStack } from "./item.ts";
 
 export { default as Selector } from "./cmd/selector.ts";
 export { Pos, Rot } from "./cmd/pos.ts";
 export { Text } from "./cmd/text.ts";
 
-function advancementSubCommands(action: "grant" | "revoke") {
+interface AdvancementCommand {
+  revoke: AdvancementSubCommand;
+  grant: AdvancementSubCommand;
+}
+
+interface AdvancementSubCommand {
+  only(
+    selector: Selector,
+    id: Identifier<Advancement>,
+    criterion?: string,
+  ): string;
+  everything(selector: Selector): string;
+  from: (selector: Selector, id: Identifier<Advancement>) => string;
+  through: (selector: Selector, id: Identifier<Advancement>) => string;
+  until: (selector: Selector, id: Identifier<Advancement>) => string;
+}
+
+function advancementSubCommands(
+  action: "grant" | "revoke",
+): AdvancementSubCommand {
   const subCommand =
     (target: "from" | "through" | "until") =>
     (selector: Selector, id: Identifier<Advancement>) =>
@@ -33,18 +53,25 @@ function advancementSubCommands(action: "grant" | "revoke") {
     until: subCommand("until"),
   };
 }
-export const advancement = {
+export const advancement: AdvancementCommand = {
   revoke: advancementSubCommands("revoke"),
   grant: advancementSubCommands("grant"),
 };
 
 export { default as Execute } from "./cmd/execute.ts";
 
-export function give(selector: Selector, item: Item, count = 1) {
-  return `give ${selector} ${item} ${count}`;
+export function give(selector: Selector, stack: Item | ItemStack): string {
+  if (stack instanceof Item) {
+    return `give ${selector} ${stack} 1`;
+  } else {
+    return `give ${selector} ${stack.item} ${stack.count}`;
+  }
 }
 
-export function particle(particle: Particle, pos = Pos.relative()) {
+export function particle(
+  particle: Particle,
+  pos: Pos = Pos.relative(),
+): string {
   let particleString;
   if (typeof particle === "string") {
     particleString = particle;

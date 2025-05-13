@@ -1,8 +1,9 @@
-import { TextJSON } from "../cmd/text.ts";
-import Item from "../item.ts";
-import Namespace, { Identifier, JSONMember } from "../namespace.ts";
-import { JSONValue, serialize } from "../serialize.ts";
-import Function from "./function.ts";
+import type { Text } from "../cmd/text.ts";
+import type Item from "../item.ts";
+import { type Identifier, JSONMember } from "../namespace.ts";
+import type Namespace from "../namespace.ts";
+import { type JSONValue, serialize } from "../serialize.ts";
+import type Function from "./function.ts";
 
 export default class Advancement<
   T extends { [name: string]: AdvancementCriteria } = {
@@ -41,8 +42,8 @@ type AdvancementDefinition<
 };
 type AdvancementDisplay = {
   icon: Item;
-  title: TextJSON;
-  description: TextJSON;
+  title: Text;
+  description: Text;
   frame?: "challenge" | "goal" | "task";
   background?: string;
   show_toast?: boolean;

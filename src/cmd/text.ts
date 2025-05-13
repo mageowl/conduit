@@ -1,6 +1,8 @@
+import type { Serialize } from "../serialize.ts";
+
 export type IntoText = string | TextComponent | TextComponent[];
 
-export class Text {
+export class Text implements Serialize {
   components: TextComponent[] = [];
 
   private constructor() {}
@@ -19,10 +21,10 @@ export class Text {
     return self;
   }
 
-  toString() {
+  toString(): string {
     return JSON.stringify(this.components);
   }
-  toJSON(): TextJSON {
+  serialize(): RawComponent[] {
     return this.components;
   }
 }
@@ -32,4 +34,3 @@ export type RawComponent = {
 };
 
 export type TextComponent = RawComponent;
-export type TextJSON = TextComponent | TextComponent[];
