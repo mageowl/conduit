@@ -9,7 +9,7 @@ export default class Advancement<
   T extends { [name: string]: AdvancementCriteria } = {
     [name: string]: AdvancementCriteria;
   },
-> extends JSONMember {
+> extends JSONMember<"data"> {
   static override readonly dataFolder: string = "advancement";
   data: AdvancementDefinition<T>;
 
@@ -19,7 +19,7 @@ export default class Advancement<
     this.data = data;
   }
 
-  override add(_namespace: Namespace, _name: string): void {}
+  override add(_namespace: Namespace<"data">, _name: string): void {}
 
   override saveJSON(): JSONValue {
     return serialize(this.data);
@@ -31,7 +31,7 @@ type AdvancementDefinition<
 > = {
   parent?: string;
   display?: AdvancementDisplay;
-  criteria: T;
+  criteria: Partial<T>;
   requirements?: (keyof T & string)[];
   rewards?: {
     experience?: number;
@@ -52,7 +52,7 @@ type AdvancementDisplay = {
 };
 
 // TODO: Implement seperate type for each criteria
-type AdvancementCriteria = {
+export type AdvancementCriteria = {
   trigger: string;
   conditions?: { [key: string]: JSONValue };
 };

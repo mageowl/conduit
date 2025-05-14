@@ -1,58 +1,35 @@
 import * as path from "@std/path";
-import Namespace from "./namespace.ts";
 import { error } from "./util.ts";
-import { cmd, Function } from "@mageowl/conduit";
-import { Selector } from "./cmd.ts";
+import { Execute, scoreboard, Selector, tellraw } from "./cmd.ts";
+import Function from "./member/function.ts";
 import { Text } from "./cmd/text.ts";
+import type { MinecraftVersion, PackMetadata, Version } from "./types.ts";
+import { Pack, parseVersion } from "./pack.ts";
 
-export interface PackageSpecifier {
+export interface Package {
   name: string;
   version: Version;
-  dependencies?: PackageSpecifier[];
-}
-export interface PackMetadata {
-  package?: PackageSpecifier;
-  description: string;
-  minecraft: MinecraftVersion;
+  dependencies?: Package[];
 }
 
-export type Version = `${number}.${number}${`.${number}` | ""}`;
-const parseVersion = (v: Version) =>
-  <[number, number] | [number, number, number]> v.split(".").map((v) =>
-    parseInt(v)
-  );
-
-export type MinecraftVersion = "1.21.5";
-function packFormat(minecraft: MinecraftVersion): number {
-  switch (minecraft) {
-    case "1.21.5":
-      return 71;
-  }
+interface DatapackMetadata extends PackMetadata {
+  package?: Package;
 }
 
-export default class Datapack {
-  private namespaces: Map<string, Namespace> = new Map();
-  private packFormat: number;
-  private description: string;
-
+export default class Datapack extends Pack<"data"> {
   constructor(
-    { package: specifier, minecraft, description }: PackMetadata,
+    metadata: DatapackMetadata,
   ) {
-    this.packFormat = packFormat(minecraft);
-    this.description = description;
-
-    if (specifier != null) {
-      this.buildVersioning(specifier);
+    super(metadata);
+    if (metadata.package != null) {
+      this.buildVersioning(metadata.package);
     }
   }
 
-  namespace(name: string): Namespace {
-    if (this.namespaces.has(name)) {
-      return this.namespaces.get(name)!;
-    } else {
-      const namespace = new Namespace(name);
-      this.namespaces.set(name, namespace);
-      return namespace;
+  override getFormat(minecraft: MinecraftVersion): number {
+    switch (minecraft) {
+      case "1.21.5":
+        return 71;
     }
   }
 
@@ -98,33 +75,35 @@ export default class Datapack {
     return true;
   }
 
-  private buildVersioning(specifier: PackageSpecifier) {
-    const [major, minor] = parseVersion(specifier.version);
-
+  private buildVersioning(specifier: Package) {
     const minecraftNs = this.namespace("minecraft");
     const onLoad = minecraftNs.tag("load", Function);
 
     const conduitNs = this.namespace("__conduit");
     const namespace = this.namespace(specifier.name);
 
-    const versionCallback = namespace.add(
-      "__conduit/version",
-      new Function([
-        cmd.scoreboard.players.set(
-          specifier.name,
-          "__conduit.version.major",
-          major,
-        ),
-        cmd.scoreboard.players.set(
-          specifier.name,
-          "__conduit.version.minor",
-          minor,
-        ),
-      ]),
-    );
-    const onVersion = conduitNs.tag("version", Function);
-    onVersion.add(versionCallback);
-    onLoad.addTag(onVersion);
+    if (specifier.version) {
+      const [major, minor] = parseVersion(specifier.version);
+
+      const versionCallback = namespace.add(
+        "__conduit/version",
+        new Function([
+          scoreboard.players.set(
+            specifier.name,
+            "__conduit.version.major",
+            major,
+          ),
+          scoreboard.players.set(
+            specifier.name,
+            "__conduit.version.minor",
+            minor,
+          ),
+        ]),
+      );
+      const onVersion = conduitNs.tag("version", Function);
+      onVersion.add(versionCallback);
+      onLoad.addTag(onVersion);
+    }
 
     if (specifier.dependencies && specifier.dependencies.length > 0) {
       const dependencyCallback = namespace.add(
@@ -132,7 +111,7 @@ export default class Datapack {
         new Function(
           specifier.dependencies.flatMap((dep) => {
             const [major, minor] = parseVersion(dep.version);
-            const error = cmd.tellraw(
+            const error = tellraw(
               Selector.all(),
               Text.from(
                 "",
@@ -141,13 +120,13 @@ export default class Datapack {
               ),
             );
             return [
-              cmd.Execute.if().score(
+              Execute.if().score(
                 dep.name,
                 "__conduit.version.major",
                 "<",
                 major,
               ).run(error),
-              cmd.Execute.unless().score(
+              Execute.unless().score(
                 dep.name,
                 "__conduit.version.major",
                 "<",

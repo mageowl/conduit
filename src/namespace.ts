@@ -4,28 +4,26 @@ import { Identifier, type Macro, Member, type MemberType } from "./member.ts";
 import { error } from "./util.ts";
 import Include from "./member/include.ts";
 import Tag from "./tag.ts";
+import type { PackType } from "./pack.ts";
 
-interface MemberMap {
-  map: Map<string, Member>;
+interface MemberMap<Type extends PackType> {
+  map: Map<string, Member<Type>>;
   dataFolder: string;
   fileExtension: string;
 }
 
-export default class Namespace {
-  name: string;
+export default class Namespace<Type extends PackType> {
   private reserved: Map<string, Set<string>> = new Map();
-  private members: Map<string, MemberMap> = new Map();
+  private members: Map<string, MemberMap<Type>> = new Map();
   private macros: Map<number, Set<string>> = new Map();
   private tags: Map<
-    MemberType,
-    Map<string, Tag<Member>>
+    MemberType<Type>,
+    Map<string, Tag<Member<Type>>>
   > = new Map();
 
-  constructor(name: string) {
-    this.name = name;
-  }
+  constructor(public name: string) {}
 
-  reserve<T extends Member, U extends unknown[]>(
+  reserve<T extends Member<Type>, U extends unknown[]>(
     path: string,
     constructor: new (...args: U) => T,
   ): Identifier<T> {
@@ -46,7 +44,7 @@ export default class Namespace {
     return new Identifier(this.name, path);
   }
 
-  initialize<T extends Member>(identifier: Identifier<T>, member: T) {
+  initialize<T extends Member<Type>>(identifier: Identifier<T>, member: T) {
     const set = this.reserved.get(member.constructor.name);
     if (
       set == null ||
@@ -77,7 +75,10 @@ export default class Namespace {
     map.set(identifier.path, member);
   }
 
-  add<T extends Member>(path: string, member: T | Macro): Identifier<T> {
+  add<T extends Member<Type>>(
+    path: string,
+    member: T | Macro<Type>,
+  ): Identifier<T> {
     if (member instanceof Member) {
       let map;
       if (this.members.has(member.constructor.name)) {
@@ -117,9 +118,9 @@ export default class Namespace {
     }
   }
 
-  tag<T extends Member>(
+  tag<T extends Member<Type>>(
     name: string,
-    constructor: MemberType<T>,
+    constructor: MemberType<Type, T>,
   ): Tag<T> {
     let map;
     if (this.tags.has(constructor)) {

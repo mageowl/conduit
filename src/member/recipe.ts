@@ -7,7 +7,7 @@ export default class Recipe<
   T extends { [char: string]: RecipeIngredient } = {
     [char: string]: RecipeIngredient;
   },
-> extends JSONMember {
+> extends JSONMember<"data"> {
   static override readonly dataFolder = "recipe";
   data: RecipeDefinition<T>;
 
@@ -16,7 +16,7 @@ export default class Recipe<
     this.data = data;
   }
 
-  override add(_namespace: Namespace, _name: string): void {}
+  override add(_namespace: Namespace<"data">, _name: string): void {}
 
   override saveJSON(): JSONValue {
     return serialize(this.data);
