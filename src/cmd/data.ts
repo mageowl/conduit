@@ -6,21 +6,21 @@ import type Selector from "./selector.ts";
 export class DataSource {
   private constructor(private selector: string, public path: string) {}
 
-  toString() {
+  toString(): string {
     return this.selector;
   }
 
-  static block(pos: Pos, path: string = "") {
+  static block(pos: Pos, path: string = ""): DataSource {
     return new DataSource(`block ${pos}`, path);
   }
-  static entity(selector: Selector, path: string = "") {
+  static entity(selector: Selector, path: string = ""): DataSource {
     return new DataSource(`entity ${selector}`, path);
   }
-  static storage(name: string, path: string = "") {
+  static storage(name: string, path: string = ""): DataSource {
     return new DataSource(`storage ${name}`, path);
   }
 
-  static self(path: string = "") {
+  static self(path: string = ""): DataSource {
     return new DataSource(`entity @s`, path);
   }
 }

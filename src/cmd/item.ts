@@ -7,7 +7,21 @@ import { serialize } from "../serialize.ts";
 import { Pos } from "./pos.ts";
 import type Selector from "./selector.ts";
 
-export default {
+const item: {
+  replace(target: Pos | Selector, slot: string): {
+    with(item: Item | ItemStack): string;
+    from(
+      other: Pos | Selector,
+      otherSlot: string,
+      modifier?: Identifier<ItemModifier> | ItemModifierDefinition,
+    ): string;
+  };
+  modify(
+    target: Pos | Selector,
+    slot: string,
+    modifier: Identifier<ItemModifier> | ItemModifierDefinition,
+  ): string;
+} = {
   replace(target: Pos | Selector, slot: string) {
     const targetStr = target instanceof Pos
       ? `block ${target}`
@@ -50,3 +64,5 @@ export default {
     return `item modify ${targetStr} ${slot} ${modifierStr}`;
   },
 };
+
+export default item;

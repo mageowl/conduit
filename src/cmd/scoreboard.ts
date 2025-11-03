@@ -1,10 +1,57 @@
 import { type Macro, macro } from "../member.ts";
 import Function from "../member/function.ts";
-import { Serializable } from "../serialize.ts";
 import buildCommand from "./builder.ts";
 import type Selector from "./selector.ts";
 import type { Text } from "./text.ts";
-import { Formatting } from "./types.ts";
+import type { Formatting } from "./types.ts";
+
+interface ScoreboardCommand {
+  players: {
+    set(
+      target: Selector | string | "*",
+      objective: string,
+      score: number,
+    ): string;
+    add(
+      target: Selector | string | "*",
+      objective: string,
+      score: number,
+    ): string;
+    remove(
+      target: Selector | string | "*",
+      objective: string,
+      score: number,
+    ): string;
+    get(
+      target: Selector | string | "*",
+      objective: string,
+    ): string;
+    reset(target: Selector | string | "*", objective: string): string;
+    operation(
+      target: Selector | string | "*",
+      targetObjective: string,
+      operation: ScoreOperation,
+      source: Selector | string | "*",
+      sourceObjective: string,
+    ): string;
+    enable(target: Selector, objective: string): string;
+  };
+  objectives: {
+    /** You should consider using `conduit.scoreObjective` to run this command on load. */
+    add(
+      name: string,
+      criteria?: Criteria,
+      displayName?: Text,
+    ): string;
+
+    list(): string;
+
+    remove(name: string): string;
+
+    setdisplay(slot: string, objective?: string): string;
+    modify: typeof modify;
+  };
+}
 
 type Criteria = "dummy" | "trigger";
 
@@ -72,7 +119,7 @@ function modify(
   return buildCommand(objective, property, value, component);
 }
 
-export const scoreboard = {
+export const scoreboard: ScoreboardCommand = {
   players: {
     // TODO: Add objective type
     set(

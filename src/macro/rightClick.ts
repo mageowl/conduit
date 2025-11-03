@@ -1,10 +1,14 @@
 import Function from "../member/function.ts";
-import { macro } from "../member.ts";
+import { type Macro, macro } from "../member.ts";
 import type { JSONObject } from "../serialize.ts";
 import Advancement from "../member/advancement.ts";
 import { advancement, Selector } from "../cmd.ts";
 
-const rightClickHandler = macro(function (
+const rightClickHandler: (
+  predicates: JSONObject,
+  callback: Function,
+  on_finish?: boolean,
+) => Macro<"data", void> = macro(function (
   predicates: JSONObject,
   callback: Function,
   on_finish: boolean = false,

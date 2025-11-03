@@ -203,7 +203,7 @@ export function give(selector: Selector, stack: Item | ItemStack): string {
 
 export { default as item } from "./cmd/item.ts";
 
-export function kill(selector: Selector = Selector.self()) {
+export function kill(selector: Selector = Selector.self()): string {
   return `kill ${selector}`;
 }
 
@@ -240,7 +240,12 @@ function buildLootTarget(
     },
   };
 }
-export const loot = {
+export const loot: {
+  give(players: Selector): LootTarget;
+  insert(pos: Pos): LootTarget;
+  spawn(pos: Pos): LootTarget;
+  replace(target: Pos | Selector, slot: string, count?: number): LootTarget;
+} = {
   give(players: Selector): LootTarget {
     return buildLootTarget("give", players);
   },
@@ -326,7 +331,11 @@ export function playsound(
   return string;
 }
 
-export const mcReturn = {
+export const mcReturn: {
+  succeed(code: number): string;
+  fail(): string;
+  run(command: string): string;
+} = {
   succeed(code: number) {
     return `return ${code}`;
   },
@@ -350,7 +359,14 @@ export function rotateFacing(
   }`;
 }
 
-export const schedule = {
+export const schedule: {
+  add(
+    fn: Identifier<Function>,
+    delay: Time,
+    mode?: "append" | "replace",
+  ): string;
+  clear(fn: Identifier<Function>): string;
+} = {
   add(fn: Identifier<Function>, delay: Time, mode?: "append" | "replace") {
     return mode
       ? `schedule function ${fn} ${delay} ${mode}`

@@ -36,7 +36,7 @@ export class Text implements Serialize {
     return self;
   }
 
-  get raw() {
+  get raw(): string {
     let str = "";
     this.components.forEach((comp) => {
       if ("text" in comp) {
