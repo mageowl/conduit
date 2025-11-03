@@ -1,4 +1,4 @@
-export function error(message: string) {
+export function error(message: string): never {
   console.log(
     `%cerror%c: ${message}`,
     "color:red;font-weight:bold;",

@@ -28,4 +28,5 @@ export { default as Predicate } from "./src/member/predicate.ts";
 export { default as rightClickHandler } from "./src/macro/rightClick.ts";
 
 export { error, mapEntries, warning } from "./src/util.ts";
+export * as assert from "./src/assert.ts";
 export { default as sequenceGraph } from "./src/sequencer.ts";

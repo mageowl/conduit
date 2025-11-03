@@ -1,6 +1,7 @@
 import { DirectoryOutput } from "@mageowl/conduit";
 import Namespace from "./namespace.ts";
 import type Output from "./output.ts";
+import { error } from "./util.ts";
 
 export interface PackMetadata {
   description: string;
@@ -13,6 +14,17 @@ export const parseVersion = (v: Version) =>
     parseInt(v)
   );
 
+export function assertMinecraftVersion(input: string): MinecraftVersion {
+  if (
+    ["1.21.5", "1.21.6", "1.21.7", "1.21.8", "1.21.9", "1.21.10"].includes(
+      input,
+    )
+  ) {
+    return input as MinecraftVersion;
+  } else {
+    error(`Not a supported minecraft version: ${input}.`);
+  }
+}
 export type MinecraftVersion =
   | "1.21.5"
   | "1.21.6"
