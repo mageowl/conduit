@@ -1,3 +1,5 @@
+import { Identifier } from "../member.ts";
+import Function from "../member/function.ts";
 import { Pos, type Rot } from "./pos.ts";
 import type Selector from "./selector.ts";
 
@@ -44,12 +46,12 @@ export default class Execute {
     return new Execute().as(selector);
   }
 
-  at(pos: Pos): this {
-    this.instructions.push(`at ${pos}`);
+  at(selector: Selector): this {
+    this.instructions.push(`at ${selector}`);
     return this;
   }
-  static at(pos: Pos): Execute {
-    return new Execute().at(pos);
+  static at(selector: Selector): Execute {
+    return new Execute().at(selector);
   }
 
   facing(target: Selector, anchor: "eyes" | "feet"): this;
@@ -149,21 +151,31 @@ export default class Execute {
     return new Execute().summon(entity);
   }
 
-  if(): ExecuteCondition {
+  get if(): ExecuteCondition {
     return new ExecuteCondition(this, false);
   }
-  static if(): ExecuteCondition {
+  static get if(): ExecuteCondition {
     return new ExecuteCondition(new Execute(), false);
   }
-  unless(): ExecuteCondition {
+  get unless(): ExecuteCondition {
     return new ExecuteCondition(this, true);
   }
-  static unless(): ExecuteCondition {
+  static get unless(): ExecuteCondition {
     return new ExecuteCondition(new Execute(), true);
   }
 
-  run(command: string): string {
-    return `execute ${this.instructions.join(" ")} run ${command}`;
+  run(command: string | string[]): string {
+    if (Array.isArray(command)) {
+      return command.map((c) =>
+        `execute ${this.instructions.join(" ")} run ${c}`
+      ).join("\n");
+    } else {
+      return `execute ${this.instructions.join(" ")} run ${command}`;
+    }
+  }
+
+  finish(): string {
+    return `execute ${this.instructions.join(" ")}`;
   }
 }
 
@@ -206,7 +218,7 @@ export class ExecuteStore {
     );
     return this.parent;
   }
-  score(target: string | "*", objective: string): Execute {
+  score(target: Selector | string | "*", objective: string): Execute {
     this.parent.instructions.push(
       `store ${this.value} score ${target} ${objective}`,
     );
@@ -237,7 +249,7 @@ export class ExecuteCondition {
   }
 
   get mode(): "if" | "unless" {
-    return this.invert ? "if" : "unless";
+    return this.invert ? "unless" : "if";
   }
 
   biome(pos: Pos, biome: string): Execute {
@@ -289,7 +301,7 @@ export class ExecuteCondition {
     return this.parent;
   }
 
-  mcFunction(id: string): Execute {
+  mcFunction(id: Identifier<Function>): Execute {
     this.parent.instructions.push(`${this.mode} function ${id}`);
     return this.parent;
   }
@@ -297,7 +309,9 @@ export class ExecuteCondition {
   // TODO: Custom predicate type
   items(source: Pos | Selector, slot: string, predicate: string): Execute {
     this.parent.instructions.push(
-      `${this.mode} items ${source} ${slot} ${predicate}`,
+      `${this.mode} items ${
+        source instanceof Pos ? "block" : "entity"
+      } ${source} ${slot} ${predicate}`,
     );
     return this.parent;
   }
@@ -314,30 +328,30 @@ export class ExecuteCondition {
   }
 
   score(
-    target: string,
+    target: Selector | string,
     objective: string,
     mode: "=",
     min: number,
     max: number,
   ): Execute;
   score(
-    target: string,
+    target: Selector | string,
     objective: string,
     mode: ExecuteIfCompareMode,
     value: number,
   ): Execute;
   score(
-    target: string,
+    target: Selector | string,
     objective: string,
     mode: ExecuteIfCompareMode,
-    sourceTarget: string,
+    sourceTarget: Selector | string,
     sourceObjective: string,
   ): Execute;
   score(
-    target: string,
+    target: Selector | string,
     objective: string,
     mode: ExecuteIfCompareMode,
-    spec1?: number | string,
+    spec1?: number | string | Selector,
     spec2?: number | string,
   ): Execute {
     let spec: string;
@@ -346,16 +360,12 @@ export class ExecuteCondition {
       spec = `matches ${min}..${max}`;
     } else if (typeof spec1 === "number") {
       if (mode === ">") {
-        this.invert = !this.invert;
-        spec = `matches ..${spec1}`;
+        spec = `matches ${spec1 + 1}..`;
       } else if (mode === "<") {
-        this.invert = !this.invert;
-        spec = `matches ${spec1}..`;
+        spec = `matches ..${spec1 - 1}`;
       } else if (mode === ">=") {
-        this.invert = !this.invert;
         spec = `matches ${spec1}..`;
       } else if (mode === "<=") {
-        this.invert = !this.invert;
         spec = `matches ..${spec1}`;
       } else {
         spec = `matches ${spec1}`;

@@ -1,10 +1,10 @@
-import * as path from "@std/path";
-import { error } from "./util.ts";
 import { Execute, scoreboard, Selector, tellraw } from "./cmd.ts";
 import Function from "./member/function.ts";
 import { Text } from "./cmd/text.ts";
 import type { MinecraftVersion, PackMetadata, Version } from "./types.ts";
 import { Pack, parseVersion } from "./pack.ts";
+import { scoreObjective } from "./cmd/scoreboard.ts";
+import type Namespace from "./namespace.ts";
 
 export interface Package {
   name: string;
@@ -18,61 +18,47 @@ interface DatapackMetadata extends PackMetadata {
 
 export default class Datapack extends Pack<"data"> {
   constructor(
-    metadata: DatapackMetadata,
+    { package: specifier, ...metadata }: DatapackMetadata,
   ) {
     super(metadata);
-    if (metadata.package != null) {
-      this.buildVersioning(metadata.package);
+    if (specifier != null) {
+      this.buildVersioning(specifier);
     }
   }
 
-  override getFormat(minecraft: MinecraftVersion): number {
+  protected override getFormat(
+    minecraft: MinecraftVersion,
+  ): number | [number, number] {
     switch (minecraft) {
       case "1.21.5":
         return 71;
+      case "1.21.6":
+        return 80;
+      case "1.21.7":
+      case "1.21.8":
+        return 81;
+      case "1.21.9":
+      case "1.21.10":
+        return [88, 0];
     }
   }
+  protected override getTypeString(): "data" {
+    return "data";
+  }
 
-  async save(savePath: string): Promise<boolean> {
-    const readRes = await Deno.permissions.request({
-      name: "read",
-      path: savePath,
-    });
-    if (readRes.state != "granted") {
-      error("Failed to save datapack. You need to allow read access.");
-      return false;
+  override namespace(name: string): Namespace<"data"> {
+    if (name !== "minecraft") {
+      const minecraftNs = super.namespace("minecraft");
+      minecraftNs.tag("load", Function).additionalValues.push({
+        id: `${name}:load`,
+        required: false,
+      });
+      minecraftNs.tag("tick", Function).additionalValues.push({
+        id: `${name}:tick`,
+        required: false,
+      });
     }
-    const writeRes = await Deno.permissions.request({
-      name: "write",
-      path: savePath,
-    });
-    if (writeRes.state != "granted") {
-      error("Failed to save datapack. You need to allow write access.");
-      return false;
-    }
-
-    await (Deno.remove(savePath, { recursive: true }).catch(() => {}));
-    const dataPath = path.join(savePath, "data");
-    await Deno.mkdir(dataPath, { recursive: true });
-
-    const file = await Deno.create(path.join(savePath, "pack.mcmeta"));
-    const encoder = new TextEncoder();
-    const text = encoder.encode(JSON.stringify({
-      pack: {
-        description: this.description,
-        pack_format: this.packFormat,
-      },
-    }));
-    file.write(text);
-
-    await Promise.all(
-      this.namespaces.entries().map(async ([name, namespace]) => {
-        await namespace.save(path.join(dataPath, name));
-      }),
-    );
-
-    console.log(`%c✅ Saved datapack to ${savePath}`, "font-weight:bold;");
-    return true;
+    return super.namespace(name);
   }
 
   private buildVersioning(specifier: Package) {
@@ -80,6 +66,9 @@ export default class Datapack extends Pack<"data"> {
     const onLoad = minecraftNs.tag("load", Function);
 
     const conduitNs = this.namespace("__conduit");
+    conduitNs.add("version.major", scoreObjective());
+    conduitNs.add("version.minor", scoreObjective());
+
     const namespace = this.namespace(specifier.name);
 
     if (specifier.version) {
@@ -112,29 +101,29 @@ export default class Datapack extends Pack<"data"> {
           specifier.dependencies.flatMap((dep) => {
             const [major, minor] = parseVersion(dep.version);
             const error = tellraw(
-              Selector.all(),
+              Selector.players(),
               Text.from(
                 "",
                 Text.from(`[${specifier.name}]`).color("red"),
-                ` Can't find dependency ${dep.name}.`,
+                ` Can't find dependency '${dep.name}'.`,
               ),
             );
             return [
-              Execute.if().score(
+              Execute.unless.score(
                 dep.name,
                 "__conduit.version.major",
-                "<",
+                ">=",
                 major,
               ).run(error),
-              Execute.unless().score(
+              Execute.if.score(
                 dep.name,
                 "__conduit.version.major",
-                "<",
+                ">=",
                 major,
-              ).if().score(
+              ).unless.score(
                 dep.name,
                 "__conduit.version.minor",
-                "<",
+                ">=",
                 minor,
               ).run(error),
             ];
@@ -142,7 +131,9 @@ export default class Datapack extends Pack<"data"> {
         ),
       );
 
-      conduitNs.tag("dependency_check", Function).add(dependencyCallback);
+      const onDepCheck = conduitNs.tag("dependency_check", Function);
+      onDepCheck.add(dependencyCallback);
+      onLoad.addTag(onDepCheck);
     }
   }
 }

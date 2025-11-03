@@ -2,6 +2,10 @@
   "version": "4",
   "specifiers": {
     "jsr:@nothing628/chalk@*": "1.0.1",
+    "jsr:@quentinadam/assert@~0.1.11": "0.1.11",
+    "jsr:@quentinadam/ensure@0.1": "0.1.0",
+    "jsr:@quentinadam/uint8array-extension@~0.1.6": "0.1.6",
+    "jsr:@quentinadam/zip@~0.1.6": "0.1.6",
     "jsr:@std/path@*": "1.0.9",
     "jsr:@std/path@^1.0.9": "1.0.9"
   },
@@ -9,12 +13,36 @@
     "@nothing628/chalk@1.0.1": {
       "integrity": "d89ab2f1a9674ce7134b791ea8f53aec728d3e00ad89d08c44785bff342d2ef6"
     },
+    "@quentinadam/assert@0.1.11": {
+      "integrity": "d4cc1042fd15528474f9b796d3305a53bab256b325897e1f7b96274d9943aa36"
+    },
+    "@quentinadam/ensure@0.1.0": {
+      "integrity": "b918726cc826bfcc6d86aab055d890d881a7ad73c554f79a41c63701a49f771e",
+      "dependencies": [
+        "jsr:@quentinadam/assert"
+      ]
+    },
+    "@quentinadam/uint8array-extension@0.1.6": {
+      "integrity": "4df194e81595723e3c7b28104083af006f75b5b8cacc9c3f032115e5559b9533",
+      "dependencies": [
+        "jsr:@quentinadam/assert"
+      ]
+    },
+    "@quentinadam/zip@0.1.6": {
+      "integrity": "22c1a5f21426a1b8ae297cd40c5ef9ad6f25fe558351d9a97f4d2cb85d259f1a",
+      "dependencies": [
+        "jsr:@quentinadam/assert",
+        "jsr:@quentinadam/ensure",
+        "jsr:@quentinadam/uint8array-extension"
+      ]
+    },
     "@std/path@1.0.9": {
       "integrity": "260a49f11edd3db93dd38350bf9cd1b4d1366afa98e81b86167b4e3dd750129e"
     }
   },
   "workspace": {
     "dependencies": [
+      "jsr:@quentinadam/zip@~0.1.6",
       "jsr:@std/path@^1.0.9"
     ]
   }

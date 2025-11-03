@@ -1,18 +1,26 @@
 import type { Components } from "./itemComponents.ts";
-import type { Serialize } from "./serialize.ts";
+import { type JSONObject, type Serialize, serialize } from "./serialize.ts";
+
+type ItemConfig = {
+  id: string;
+  components?: Components;
+} | string;
 
 export default class Item implements Serialize {
   id: string;
   components: Components;
 
   constructor(
-    { id, components = {} }: {
-      id: string;
-      components?: Components;
-    },
+    config: ItemConfig,
   ) {
-    this.id = id;
-    this.components = components;
+    if (typeof config === "string") {
+      this.id = config;
+      this.components = {};
+    } else {
+      const { id, components = {} } = config;
+      this.id = id;
+      this.components = components;
+    }
   }
 
   count(count: number): ItemStack {
@@ -22,14 +30,18 @@ export default class Item implements Serialize {
   toString(): string {
     const components: string[] = [];
     Object.entries(this.components).forEach(([key, value]) => {
-      components.push(`${key}=${JSON.stringify(value)}`);
+      if (key.startsWith("!")) {
+        components.push(key);
+      } else {
+        components.push(`${key}=${JSON.stringify(serialize(value))}`);
+      }
     });
     return `${this.id}[${components.join(",")}]`;
   }
-  serialize(): { id: string; components: Components } {
+  serialize(): JSONObject {
     return {
       id: this.id,
-      components: this.components,
+      components: serialize(this.components),
     };
   }
 }
@@ -39,17 +51,22 @@ export class ItemStack implements Serialize {
   count: number;
 
   constructor(
-    item: Item,
+    item: Item | ItemConfig,
     count: number,
   ) {
-    this.item = item;
+    if (item instanceof Item) this.item = item;
+    else this.item = new Item(item);
     this.count = count;
   }
 
-  serialize(): { count: number; id: string; components: Components } {
+  serialize(): JSONObject {
     return {
       ...this.item.serialize(),
       count: this.count,
     };
+  }
+
+  toString(): string {
+    return `${this.item} ${this.count}`;
   }
 }

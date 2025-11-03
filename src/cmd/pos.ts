@@ -19,11 +19,20 @@ export class Pos {
   public static world(x: number, y: number, z: number): Pos {
     return new Pos("world", x, y, z);
   }
+  public static abs(x: number, y: number, z: number): Pos {
+    return Pos.world(x, y, z);
+  }
   public static relative(x = 0, y = 0, z = 0): Pos {
     return new Pos("relative", x, y, z);
   }
+  public static rel(x = 0, y = 0, z = 0): Pos {
+    return Pos.relative(x, y, z);
+  }
   public static rotLocal(x: number, y: number, z: number): Pos {
     return new Pos("rotLocal", x, y, z);
+  }
+  public static rot(x: number, y: number, z: number): Pos {
+    return Pos.rotLocal(x, y, z);
   }
   /**
    * Creates a "mixed" postion, consisting of some relative and some world coordinates.
@@ -45,15 +54,19 @@ export class Pos {
   toString(): string {
     switch (this.mode) {
       case "world":
-        return `${this.x} ${this.y} ${this.z}`;
+        return `${this.x.toFixed(4)} ${this.y.toFixed(4)} ${this.z.toFixed(4)}`;
       case "relative":
-        return `~${this.x} ~${this.y} ~${this.z}`;
+        return `~${this.x.toFixed(4)} ~${this.y.toFixed(4)} ~${
+          this.z.toFixed(4)
+        }`;
       case "rotLocal":
-        return `^${this.x} ^${this.y} ^${this.z}`;
+        return `^${this.x.toFixed(4)} ^${this.y.toFixed(4)} ^${
+          this.z.toFixed(4)
+        }`;
       default: {
-        const xTag = this.mode >= Pos.RELATIVE_X ? "~" : "";
-        const yTag = this.mode >= Pos.RELATIVE_Y ? "~" : "";
-        const zTag = this.mode >= Pos.RELATIVE_Z ? "~" : "";
+        const xTag = this.mode & Pos.RELATIVE_X ? "~" : "";
+        const yTag = this.mode & Pos.RELATIVE_Y ? "~" : "";
+        const zTag = this.mode & Pos.RELATIVE_Z ? "~" : "";
         return `${xTag}${this.x} ${yTag}${this.y} ${zTag}${this.z}`;
       }
     }
@@ -100,8 +113,8 @@ export class Rot {
       case "relative":
         return `~${this.x} ~${this.y}`;
       default: {
-        const xTag = this.mode >= Rot.RELATIVE_X ? "~" : "";
-        const yTag = this.mode >= Rot.RELATIVE_Y ? "~" : "";
+        const xTag = this.mode & Rot.RELATIVE_X ? "~" : "";
+        const yTag = this.mode & Rot.RELATIVE_Y ? "~" : "";
         return `${xTag}${this.x} ${yTag}${this.y}`;
       }
     }

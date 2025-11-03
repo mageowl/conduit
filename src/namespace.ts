@@ -1,10 +1,17 @@
 import * as path from "@std/path";
-import { Identifier, type Macro, Member, type MemberType } from "./member.ts";
+import {
+  type Appendable,
+  Identifier,
+  type Macro,
+  Member,
+  type MemberType,
+} from "./member.ts";
 
 import { error } from "./util.ts";
-import Include from "./member/include.ts";
-import Tag from "./tag.ts";
+import { Include } from "./member/include.ts";
+import Tag, { type HardCodedRegistry, RegistryTag } from "./tag.ts";
 import type { PackType } from "./pack.ts";
+import type Output from "./output.ts";
 
 interface MemberMap<Type extends PackType> {
   map: Map<string, Member<Type>>;
@@ -20,15 +27,22 @@ export default class Namespace<Type extends PackType> {
     MemberType<Type>,
     Map<string, Tag<Member<Type>>>
   > = new Map();
+  private registryTags: Map<
+    HardCodedRegistry,
+    Map<string, RegistryTag<HardCodedRegistry>>
+  > = new Map();
 
-  constructor(public name: string) {}
+  constructor(
+    public name: string,
+    public packFormat: number | [number, number],
+  ) {}
 
   reserve<T extends Member<Type>, U extends unknown[]>(
     path: string,
     constructor: new (...args: U) => T,
   ): Identifier<T> {
     let set: Set<string>;
-    if (this.reserved.has(path)) {
+    if (this.reserved.has(constructor.name)) {
       set = this.reserved.get(constructor.name)!;
     } else {
       set = new Set();
@@ -37,7 +51,6 @@ export default class Namespace<Type extends PackType> {
 
     if (set.has(path)) {
       error(`The member '${path}' is already defined.`);
-      Deno.exit(1);
     }
     set.add(path);
 
@@ -53,7 +66,6 @@ export default class Namespace<Type extends PackType> {
       )
     ) {
       error(`The identifier '${identifier}' was not previously reserved.`);
-      Deno.exit(1);
     }
 
     let map;
@@ -70,15 +82,22 @@ export default class Namespace<Type extends PackType> {
 
     if (map.has(identifier.path)) {
       error(`The member '${identifier}' is already defined.`);
-      Deno.exit(1);
     }
     map.set(identifier.path, member);
   }
 
   add<T extends Member<Type>>(
     path: string,
-    member: T | Macro<Type>,
-  ): Identifier<T> {
+    member: T,
+  ): Identifier<T>;
+  add<O>(
+    path: string,
+    member: Macro<Type, O>,
+  ): O;
+  add<T extends Member<Type> | Macro<Type, O>, O>(
+    path: string,
+    member: T,
+  ): Identifier<T> | O {
     if (member instanceof Member) {
       let map;
       if (this.members.has(member.constructor.name)) {
@@ -92,9 +111,12 @@ export default class Namespace<Type extends PackType> {
         });
       }
 
+      if (this.reserved.has(member.constructor.name)) {
+        this.reserved.get(member.constructor.name)!.delete(path);
+      }
+
       if (map.has(path)) {
         error(`The member '${path}' is already defined.`);
-        Deno.exit(1);
       }
       map.set(path, member);
 
@@ -110,12 +132,35 @@ export default class Namespace<Type extends PackType> {
 
       if (set.has(path)) {
         error(`The member '${path}' is already defined.`);
-        Deno.exit(1);
       }
-      member.callback(this, path);
 
-      return new Identifier(this.name, path);
+      return member.callback(this, path);
     }
+  }
+  appendOrCreate<T extends Member<Type> & Appendable>(
+    path: string | Identifier<T>,
+    member: T,
+  ): Identifier<T> {
+    let map;
+    if (this.members.has(member.constructor.name)) {
+      map = this.members.get(member.constructor.name)!.map;
+    } else {
+      map = new Map();
+      this.members.set(member.constructor.name, {
+        map,
+        fileExtension: member.fileExtension,
+        dataFolder: member.dataFolder,
+      });
+    }
+
+    if (map.has(path instanceof Identifier ? path.path : path)) {
+      const other = map.get(path)! as T;
+      other.append(member);
+    } else {
+      map.set(path, member);
+    }
+
+    return path instanceof Identifier ? path : new Identifier(this.name, path);
   }
 
   tag<T extends Member<Type>>(
@@ -133,7 +178,27 @@ export default class Namespace<Type extends PackType> {
     if (map.has(name)) {
       return map.get(name)!;
     } else {
-      const tag = new Tag<T>(new Identifier<Tag<T>>(this.name, name));
+      const tag = new Tag<T>(new Identifier(this.name, name));
+      map.set(name, tag);
+      return tag;
+    }
+  }
+  registryTag<T extends HardCodedRegistry>(
+    name: string,
+    reg: T,
+  ): RegistryTag<T> {
+    let map;
+    if (this.registryTags.has(reg)) {
+      map = this.registryTags.get(reg)!;
+    } else {
+      map = new Map();
+      this.registryTags.set(reg, map);
+    }
+
+    if (map.has(reg)) {
+      return map.get(reg)!;
+    } else {
+      const tag = new RegistryTag<T>(new Identifier(this.name, name));
       map.set(name, tag);
       return tag;
     }
@@ -147,72 +212,78 @@ export default class Namespace<Type extends PackType> {
             `The identifier '${this.name}:${name}' was reserved, but never initialized`,
           );
         });
-        Deno.exit(1);
       }
     });
   }
 
-  async save(savePath: string) {
+  save(output: Output) {
     this.validate();
 
-    await Deno.mkdir(savePath);
-    await Promise.all(
-      this.members.entries().map(
-        async ([kind, { map, dataFolder, fileExtension }]) => {
-          const dataPath = kind === "Include" ? savePath : path.join(
-            savePath,
-            dataFolder,
-          );
-          const foldersCreated = [""];
-          await Deno.mkdir(dataPath);
+    this.members.values().forEach(
+      ({ map, dataFolder, fileExtension }) => {
+        const foldersCreated = ["."];
+        output.mkdir(dataFolder);
 
-          await Promise.all(
-            map.entries().map(async ([name, member]) => {
-              const dirname = path.dirname(name);
-              if (!foldersCreated.includes(dirname)) {
-                await Deno.mkdir(path.join(dataPath, dirname), {
-                  recursive: true,
-                });
-              }
+        map.forEach((member, name) => {
+          const dirname = path.dirname(name);
+          if (!foldersCreated.includes(dirname)) {
+            output.mkdir(path.join(dataFolder, dirname), {
+              recursive: true,
+            });
+          }
+          foldersCreated.push(dirname);
 
-              const filePath = member instanceof Include
-                ? path.join(member.folder, name) + path.extname(member.fromPath)
-                : (path.join(dataPath, name) +
-                  `.${fileExtension}`);
-              await member.save(filePath);
-            }),
-          );
-        },
-      ),
+          const filePath = member instanceof Include
+            ? name + path.extname(member.fromPath)
+            : (path.join(dataFolder, name) +
+              `.${fileExtension}`);
+          member.save(output.file(filePath));
+        });
+      },
     );
 
-    if (this.tags.size > 0) {
-      await Deno.mkdir(path.join(savePath, "tags"));
-      await Promise.all(
-        this.tags.entries().map(async ([constructor, map]) => {
-          const dataPath = path.join(savePath, "tags", constructor.dataFolder);
-          const foldersCreated = [""];
-          await Deno.mkdir(dataPath);
+    if (this.tags.size > 0 || this.registryTags.size > 0) {
+      output.mkdir("tags");
+      this.tags.forEach((map, constructor) => {
+        const dataPath = path.join("tags", constructor.dataFolder);
+        const foldersCreated = ["."];
+        output.mkdir(dataPath);
 
-          await Promise.all(
-            map.entries().map(async ([name, tag]) => {
-              const dirname = path.dirname(name);
-              if (!foldersCreated.includes(dirname)) {
-                await Deno.mkdir(path.join(dataPath, dirname), {
-                  recursive: true,
-                });
-              }
+        map.forEach((tag, name) => {
+          const dirname = path.dirname(name);
+          if (!foldersCreated.includes(dirname)) {
+            output.mkdir(path.join(dataPath, dirname), {
+              recursive: true,
+            });
+          }
+          foldersCreated.push(dirname);
 
-              const file = await Deno.create(
-                path.join(dataPath, name) + ".json",
-              );
-              const encoder = new TextEncoder();
-              const bytes = encoder.encode(JSON.stringify(tag.serialize()));
-              await file.write(bytes);
-            }),
+          output.writeFile(
+            path.join(dataPath, name) + ".json",
+            JSON.stringify(tag.toJSON()),
           );
-        }),
-      );
+        });
+      });
+      this.registryTags.forEach((map, reg) => {
+        const dataPath = path.join("tags", reg);
+        const foldersCreated = ["."];
+        output.mkdir(dataPath);
+
+        map.forEach((tag, name) => {
+          const dirname = path.dirname(name);
+          if (!foldersCreated.includes(dirname)) {
+            output.mkdir(path.join(dataPath, dirname), {
+              recursive: true,
+            });
+          }
+          foldersCreated.push(dirname);
+
+          output.writeFile(
+            path.join(dataPath, name) + ".json",
+            JSON.stringify(tag.toJSON()),
+          );
+        });
+      });
     }
   }
 

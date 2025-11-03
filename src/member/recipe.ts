@@ -9,11 +9,9 @@ export default class Recipe<
   },
 > extends JSONMember<"data"> {
   static override readonly dataFolder = "recipe";
-  data: RecipeDefinition<T>;
 
-  constructor(data: RecipeDefinition<T>) {
+  constructor(public readonly data: RecipeDefinition<T>) {
     super();
-    this.data = data;
   }
 
   override add(_namespace: Namespace<"data">, _name: string): void {}

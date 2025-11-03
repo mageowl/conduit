@@ -1,4 +1,5 @@
 import type Namespace from "./namespace.ts";
+import type { OutputFile } from "./output.ts";
 import type { PackType } from "./pack.ts";
 import type { JSONValue, Serialize } from "./serialize.ts";
 
@@ -20,28 +21,27 @@ export abstract class Member<Type extends PackType> {
   }
 
   abstract add(namespace: Namespace<Type>, name: string): void;
-  abstract save(filePath: string): Promise<void>;
+  abstract save(file: OutputFile): void;
 }
 export abstract class JSONMember<Type extends PackType> extends Member<Type> {
   static override readonly fileExtension = "json";
 
   abstract saveJSON(): JSONValue;
-  override async save(filePath: string) {
-    const encoder = new TextEncoder();
-    const file = await Deno.create(filePath);
-    file.write(encoder.encode(JSON.stringify(this.saveJSON())));
+  override save(file: OutputFile) {
+    file.write(JSON.stringify(this.saveJSON()));
   }
+}
+export interface Appendable {
+  append(other: this): void;
 }
 
 export class Identifier<T> implements Serialize {
   private readonly _constraint: T | undefined = undefined;
-  readonly namespace: string;
-  readonly path: string;
 
-  constructor(namespace: string, path: string) {
-    this.namespace = namespace;
-    this.path = path;
-  }
+  constructor(
+    public readonly namespace: string,
+    public readonly path: string,
+  ) {}
 
   toString(): string {
     return `${this.namespace}:${this.path}`;
@@ -52,22 +52,22 @@ export class Identifier<T> implements Serialize {
 }
 
 let macroId = 0;
-export function macro<T extends unknown[], P extends PackType>(
-  callback: (...args: T) => MacroCallback<P>,
-): (...args: T) => Macro<P> {
+export function macro<P extends PackType, U extends unknown[], O>(
+  callback: (...args: U) => MacroCallback<P, O>,
+): (...args: U) => Macro<P, O> {
   const id = macroId++;
   return (...args) => new Macro(callback(...args), id);
 }
 
-type MacroCallback<Type extends PackType> = (
+type MacroCallback<Type extends PackType, O> = (
   namespace: Namespace<Type>,
   name: string,
-) => void;
-export class Macro<Type extends PackType> {
-  readonly callback: MacroCallback<Type>;
+) => O;
+export class Macro<Type extends PackType, O> {
+  readonly callback: MacroCallback<Type, O>;
   readonly id: number;
 
-  constructor(callback: MacroCallback<Type>, id: number) {
+  constructor(callback: MacroCallback<Type, O>, id: number) {
     this.callback = callback;
     this.id = id;
   }

@@ -11,12 +11,9 @@ export default class Advancement<
   },
 > extends JSONMember<"data"> {
   static override readonly dataFolder: string = "advancement";
-  data: AdvancementDefinition<T>;
 
-  constructor(data: AdvancementDefinition<T>) {
+  constructor(public data: AdvancementDefinition<T>) {
     super();
-
-    this.data = data;
   }
 
   override add(_namespace: Namespace<"data">, _name: string): void {}
@@ -29,7 +26,7 @@ export default class Advancement<
 type AdvancementDefinition<
   T extends { [name: string]: AdvancementCriteria },
 > = {
-  parent?: string;
+  parent?: Identifier<Advancement>;
   display?: AdvancementDisplay;
   criteria: Partial<T>;
   requirements?: (keyof T & string)[];

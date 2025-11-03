@@ -1,19 +1,19 @@
 import type Namespace from "../namespace.ts";
-import { Member } from "../member.ts";
+import { JSONMember, Member } from "../member.ts";
 import type { PackType } from "../pack.ts";
+import type { OutputFile } from "../output.ts";
+import { type JSONValue, type Serializable, serialize } from "../serialize.ts";
 
-export default class Include extends Member<PackType> {
-  // These are specially assigned by Namespace.
-  static override readonly fileExtension: string = "";
+export class Include extends Member<PackType> {
   static override readonly dataFolder: string = "";
+  // This is specially reassigned by Namespace.
+  static override readonly fileExtension: string = "";
 
   fromPath: string;
-  folder: string;
 
-  constructor(from: string, folder: string) {
+  constructor(from: string) {
     super();
     this.fromPath = from;
-    this.folder = folder;
 
     // Make sure we have access to reading from the current directory.
     Deno.permissions.requestSync({ name: "read", path: "." });
@@ -21,12 +21,25 @@ export default class Include extends Member<PackType> {
 
   override add(_namespace: Namespace<PackType>, _name: string): void {}
 
-  override async save(outPath: string): Promise<void> {
-    const fromFile = await Deno.open(this.fromPath);
-    const bytes = new Uint8Array();
-    await fromFile.read(bytes);
+  override save(file: OutputFile): void {
+    const bytes = Deno.readFileSync(this.fromPath);
+    file.write(bytes);
+  }
+}
 
-    const outFile = await Deno.create(outPath);
-    await outFile.write(bytes);
+export class JSONInclude extends JSONMember<PackType> {
+  static override readonly dataFolder: string = "";
+
+  data: Serializable;
+
+  constructor(data: Serializable) {
+    super();
+    this.data = data;
+  }
+
+  override add(_namespace: Namespace<PackType>, _name: string): void {}
+
+  override saveJSON(): JSONValue {
+    return serialize(this.data);
   }
 }

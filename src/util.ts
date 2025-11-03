@@ -4,6 +4,7 @@ export function error(message: string) {
     "color:red;font-weight:bold;",
     "color:unset;font-weight:unset;",
   );
+  Deno.exit(1);
 }
 export function warning(message: string) {
   console.log(

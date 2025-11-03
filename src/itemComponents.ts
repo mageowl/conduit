@@ -1,5 +1,9 @@
-import type { JSONObject, JSONValue } from "./serialize.ts";
+import type ItemModel from "./member/itemModel.ts";
+import type { TextComponent } from "./cmd/text.ts";
+import type { JSONObject, JSONValue, Serializable } from "./serialize.ts";
+import { Identifier } from "./member.ts";
 
+export type ItemRarity = "common" | "uncommon" | "rare" | "epic";
 export type ConsumeEffectApplyEffects = {
   type: "apply_effects";
   effects: {
@@ -30,7 +34,7 @@ export type ConsumeEffectPlaySound = {
 };
 export type ConsumeEffect = ConsumeEffectApplyEffects;
 
-export interface Components extends JSONObject {
+interface PositiveComponents {
   consumable?: {
     consume_seconds?: number;
     animation?:
@@ -49,7 +53,30 @@ export interface Components extends JSONObject {
     on_consume_effects?: ConsumeEffect[];
   };
   custom_data?: { [key: string]: JSONValue };
+  custom_model_data?: {
+    floats?: number[];
+    flags?: boolean[];
+    strings?: string[];
+    colors?: ([number, number, number] | number)[];
+  };
+  enchantment_glint_override?: boolean;
+  entity_data?: {
+    id: string;
+    [name: string]: JSONValue;
+  };
+  item_model?: Identifier<ItemModel> | string;
+  item_name?: string | TextComponent | TextComponent[];
+  rarity?: ItemRarity;
 
   // Extra components that we might not know about.
-  [name: string]: JSONValue | undefined;
+  [name: string]: Serializable | undefined;
 }
+
+export type Components =
+  & PositiveComponents
+  & {
+    [Key in `!${keyof PositiveComponents}`]: Record<
+      string | number | symbol,
+      never
+    >;
+  };
