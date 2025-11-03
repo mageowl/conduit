@@ -1,12 +1,11 @@
 import type { Particle } from "../cmd.ts";
 import { type Identifier, JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
-import { OutputFile } from "../output.ts";
 import { type JSONObject, type JSONValue, serialize } from "../serialize.ts";
 import type Tag from "../tag.ts";
 import type { NumberProvider, Rename } from "../types.ts";
 import type Function from "./function.ts";
-import type { PredicateDefintion } from "./predicate.ts";
+import type { PredicateDefinition } from "./predicate.ts";
 
 export default class Enchantment extends JSONMember<"data"> {
   static override readonly dataFolder: string = "enchantment";
@@ -61,11 +60,11 @@ export type EnchantmentDefinition = {
       }[];
       location_changed?: {
         effect: LocationBasedEffect;
-        requirements?: PredicateDefintion;
+        requirements?: PredicateDefinition;
       }[];
       damage_immunity?: {
         effect: Record<string | number | symbol, never>;
-        requirements?: PredicateDefintion | PredicateDefintion[];
+        requirements?: PredicateDefinition | PredicateDefinition[];
       }[];
       prevent_equipment_drop?: Record<string | number | symbol, never>;
       prevent_armor_change?: Record<string | number | symbol, never>;
@@ -98,7 +97,7 @@ type ValueEffectComponentName =
   | "mob_experience";
 type ValueEffectComponent = {
   effect: ValueEffect;
-  requirements?: PredicateDefintion | PredicateDefintion[];
+  requirements?: PredicateDefinition | PredicateDefinition[];
 };
 
 type EntityEffectComponentName =
@@ -107,7 +106,7 @@ type EntityEffectComponentName =
   | "projectile_spawned";
 type EntityEffectComponent = {
   effect: EntityEffect;
-  requirements?: PredicateDefintion;
+  requirements?: PredicateDefinition;
 };
 
 type ValueEffect =
@@ -209,14 +208,14 @@ type EntityReplaceBlockEffect = {
   type: "replace_block";
   block_state: JSONObject; // TODO
   offset?: [number, number, number];
-  predicate?: PredicateDefintion;
+  predicate?: PredicateDefinition;
   trigger_game_event?: string;
 };
 type EntityReplaceDiskEffect = {
   type: "replace_disk";
   block_state: JSONObject; // TODO
   offset?: [number, number, number];
-  predicate?: PredicateDefintion;
+  predicate?: PredicateDefinition;
   trigger_game_event?: string;
   radius: LevelBasedValue;
   height: LevelBasedValue;

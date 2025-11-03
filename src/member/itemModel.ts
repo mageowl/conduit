@@ -77,7 +77,7 @@ type CustomModelDataTint = {
   default: [number, number, number];
 };
 
-type ItemModelDefinition =
+export type ItemModelDefinition =
   | ModelDefinition
   | CompositeDefinition
   | ConditionDefinition

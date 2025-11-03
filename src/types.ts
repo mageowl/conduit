@@ -11,12 +11,16 @@ export type {
   Serializable,
   Serialize,
 } from "./serialize.ts";
-export type { AdvancementCriteria } from "./member/advancement.ts";
+
 export type {
   Entry as LootEntry,
+  LootTableDefinition,
   Pool as LootPool,
 } from "./member/lootTable.ts";
-
+export type {
+  AdvancementCriteria,
+  AdvancementDefinition,
+} from "./member/advancement.ts";
 export type {
   DialogAction,
   DialogButton,
@@ -24,8 +28,11 @@ export type {
   DialogElement,
   DialogInput,
 } from "./member/dialog.ts";
-
-export type { FontProvider } from "./member/font.ts";
+export type { FontDefinition, FontProvider } from "./member/font.ts";
+export type { RecipeDefinition } from "./member/recipe.ts";
+export type { EnchantmentDefinition } from "./member/enchantment.ts";
+export type { ItemModelDefinition } from "./member/itemModel.ts";
+export type { PredicateDefinition } from "./member/predicate.ts";
 
 export type Rename<T, K extends keyof T, N extends string> =
   & Pick<T, Exclude<K, keyof T>>

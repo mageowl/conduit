@@ -8,7 +8,7 @@ import Enchantment, { LevelBasedValue } from "./enchantment.ts";
 export default class Predicate extends JSONMember<"data"> {
   static override readonly dataFolder: string = "predicate";
 
-  constructor(public data: PredicateDefintion) {
+  constructor(public data: PredicateDefinition) {
     super();
   }
 
@@ -19,7 +19,7 @@ export default class Predicate extends JSONMember<"data"> {
   }
 }
 
-export type PredicateDefintion =
+export type PredicateDefinition =
   | BooleanCondition
   | BlockStatePropertyCondition
   | DamageSourceCondition
@@ -40,7 +40,7 @@ export type PredicateDefintion =
 
 type BooleanCondition = {
   condition: "all_of" | "any_of";
-  terms: PredicateDefintion[];
+  terms: PredicateDefinition[];
 };
 type BlockStatePropertyCondition = {
   condition: "block_state_property";
@@ -72,7 +72,7 @@ type EntityScoresCondition = {
 };
 type InvertedCondition = {
   condition: "inverted";
-  term: PredicateDefintion;
+  term: PredicateDefinition;
 };
 type KilledByPlayerCondition = {
   condition: "killed_by_player";

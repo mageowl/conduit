@@ -23,7 +23,7 @@ export default class Advancement<
   }
 }
 
-type AdvancementDefinition<
+export type AdvancementDefinition<
   T extends { [name: string]: AdvancementCriteria },
 > = {
   parent?: Identifier<Advancement>;

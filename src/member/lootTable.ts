@@ -28,7 +28,7 @@ export default class LootTable extends JSONMember<"data">
   }
 }
 
-type LootTableDefinition = {
+export type LootTableDefinition = {
   type?: LootContext;
   functions?: ItemModifierDefinition[];
   pools: Pool[];

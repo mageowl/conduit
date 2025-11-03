@@ -21,7 +21,7 @@ export default class Recipe<
   }
 }
 
-type RecipeDefinition<T extends { [char: string]: RecipeIngredient }> =
+export type RecipeDefinition<T extends { [char: string]: RecipeIngredient }> =
   | BlastingRecipe
   | CampfireCookingRecipe
   | CraftingShapedRecipe<T>
