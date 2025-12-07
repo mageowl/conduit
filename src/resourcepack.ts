@@ -20,7 +20,7 @@ export default class Resourcepack extends Pack<"assets"> {
         return 64;
       case "1.21.9":
       case "1.21.10":
-        return [88, 0];
+        return [69, 0];
     }
   }
   protected override getTypeString(): "assets" {
