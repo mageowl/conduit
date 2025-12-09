@@ -3,6 +3,7 @@ export type { MinecraftVersion, PackMetadata, Version } from "./pack.ts";
 export type { default as Namespace } from "./namespace.ts";
 export type { Identifier, Macro } from "./member.ts";
 export type * as component from "./itemComponents.ts";
+export type * from "./text.ts";
 export type { Components } from "./itemComponents.ts";
 export type {
   JSONObject,

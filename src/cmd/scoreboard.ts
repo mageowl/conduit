@@ -2,8 +2,7 @@ import { type Macro, macro } from "../member.ts";
 import Function from "../member/function.ts";
 import buildCommand from "./builder.ts";
 import type Selector from "./selector.ts";
-import type { Text } from "./text.ts";
-import type { Formatting } from "./types.ts";
+import type { Formatting, Text } from "../text.ts";
 
 interface ScoreboardCommand {
   players: {

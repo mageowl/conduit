@@ -1,9 +1,9 @@
-import type { Components } from "../itemComponents.ts";
-import type { Identifier } from "../member.ts";
-import type Dialog from "../member/dialog.ts";
-import type Font from "../member/font.ts";
-import { type JSONValue, type Serialize, serialize } from "../serialize.ts";
-import type Selector from "./selector.ts";
+import type { Components } from "./itemComponents.ts";
+import type { Identifier } from "./member.ts";
+import type Dialog from "./member/dialog.ts";
+import type Font from "./member/font.ts";
+import { type JSONValue, type Serialize, serialize } from "./serialize.ts";
+import type Selector from "./cmd/selector.ts";
 
 export type IntoText = string | TextComponent | Text | IntoText[];
 

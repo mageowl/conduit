@@ -1,6 +1,6 @@
 import { Execute, scoreboard, Selector, tellraw } from "./cmd.ts";
 import Function from "./member/function.ts";
-import { Text } from "./cmd/text.ts";
+import { Text } from "./text.ts";
 import type { MinecraftVersion, PackMetadata, Version } from "./types.ts";
 import { Pack, parseVersion } from "./pack.ts";
 import { scoreObjective } from "./cmd/scoreboard.ts";
@@ -104,7 +104,7 @@ export default class Datapack extends Pack<"data"> {
               Selector.players(),
               Text.from(
                 "",
-                Text.from(`[${specifier.name}]`).color("red"),
+                Text.of(`[${specifier.name}]`).color("red"),
                 ` Can't find dependency '${dep.name}'.`,
               ),
             );

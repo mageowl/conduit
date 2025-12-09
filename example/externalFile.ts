@@ -6,10 +6,9 @@ const pack = new conduit.Datapack({
 
 const namespace = pack.namespace("test");
 namespace.add(
-  "included_loot_table",
+  "loot_table/included_loot",
   new conduit.Include(
-    import.meta.resolve("./loot_table.json"),
-    "loot_table",
+    "./example/loot_table.json",
   ),
 );
 

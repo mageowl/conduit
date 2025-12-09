@@ -1,5 +1,5 @@
-import { IntoText } from "../cmd/text.ts";
-import { Components } from "../itemComponents.ts";
+import type { IntoText } from "../text.ts";
+import type { Components } from "../itemComponents.ts";
 import { JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
 import { type JSONObject, type JSONValue, serialize } from "../serialize.ts";

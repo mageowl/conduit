@@ -1,8 +1,8 @@
-import type { IntoText } from "../cmd/types.ts";
+import type { IntoText } from "../text.ts";
 import type { default as Item, ItemStack } from "../item.ts";
 import { type Identifier, JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
-import { JSONObject, type JSONValue, serialize } from "../serialize.ts";
+import { type JSONObject, type JSONValue, serialize } from "../serialize.ts";
 import type Tag from "../tag.ts";
 import { error } from "../util.ts";
 

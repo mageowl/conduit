@@ -4,7 +4,7 @@ import Item from "./item.ts";
 import type Advancement from "./member/advancement.ts";
 import type Function from "./member/function.ts";
 import type { Identifier } from "./member.ts";
-import { type IntoText, Text } from "./cmd/text.ts";
+import { type IntoText, Text } from "./text.ts";
 import { Pos, type Rot } from "./cmd/pos.ts";
 import type { ItemStack } from "./item.ts";
 import { type Serializable, serialize } from "./serialize.ts";
@@ -12,13 +12,12 @@ import { DataSource } from "./cmd/data.ts";
 import type { DialogDefinition, Time } from "./types.ts";
 import type { SimpleParticleId } from "./cmd/types.ts";
 import buildCommand from "./cmd/builder.ts";
-import LootTable from "./member/lootTable.ts";
-import Dialog from "./member/dialog.ts";
+import type LootTable from "./member/lootTable.ts";
+import type Dialog from "./member/dialog.ts";
 
 export { default as Selector } from "./cmd/selector.ts";
 export { Pos, Rot } from "./cmd/pos.ts";
-export { Text } from "./cmd/text.ts";
-export type * from "./cmd/types.ts";
+export * from "./cmd/types.ts";
 
 interface AdvancementCommand {
   revoke: AdvancementSubCommand;

@@ -1,5 +1,5 @@
 import type ItemModel from "./member/itemModel.ts";
-import type { TextComponent } from "./cmd/text.ts";
+import type { TextComponent } from "./text.ts";
 import type { JSONObject, JSONValue, Serializable } from "./serialize.ts";
 import { Identifier } from "./member.ts";
 

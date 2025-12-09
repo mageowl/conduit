@@ -30,7 +30,7 @@ if (import.meta.main) {
   namespace.add(
     "wand",
     conduit.rightClickHandler(
-      rightClickWand,
+      { custom_data: rightClickWand.components.custom_data },
       new conduit.Function([
         tellraw(Selector.self(), "Poof!"),
         Execute.anchored("eyes").run(particle({

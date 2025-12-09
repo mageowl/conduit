@@ -12,6 +12,7 @@ export type * from "./src/types.ts";
 export * as cmd from "./src/cmd.ts";
 export { default as Item, ItemStack } from "./src/item.ts";
 export { scoreObjective } from "./src/cmd/scoreboard.ts";
+export { Text } from "./src/text.ts";
 
 export { default as Function } from "./src/member/function.ts";
 export { default as LootTable } from "./src/member/lootTable.ts";

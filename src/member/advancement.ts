@@ -1,4 +1,4 @@
-import type { Text } from "../cmd/text.ts";
+import type { Text } from "../text.ts";
 import type Item from "../item.ts";
 import { type Identifier, JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
