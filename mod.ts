@@ -1,3 +1,5 @@
+export { default as build } from "./src/cli.ts";
+
 export { default as Datapack } from "./src/datapack.ts";
 export { default as Resourcepack } from "./src/resourcepack.ts";
 
@@ -5,7 +7,7 @@ export { JSONMember, macro, Member } from "./src/member.ts";
 export { serialize } from "./src/serialize.ts";
 export { default as Output } from "./src/output.ts";
 export { default as DirectoryOutput } from "./src/output/directory.ts";
-export { default as ZipOutput } from "./src/output/zip.ts";
+export { default as ZippedOutput } from "./src/output/zip.ts";
 
 export type * from "./src/types.ts";
 

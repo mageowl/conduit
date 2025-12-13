@@ -17,10 +17,13 @@ interface DatapackMetadata extends PackMetadata {
 }
 
 export default class Datapack extends Pack<"data"> {
+  public readonly package?: Package;
+
   constructor(
     { package: specifier, ...metadata }: DatapackMetadata,
   ) {
     super(metadata);
+    this.package = specifier;
     if (specifier != null) {
       this.buildVersioning(specifier);
     }

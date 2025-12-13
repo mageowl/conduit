@@ -102,7 +102,6 @@ export abstract class Pack<Type extends PackType> {
       namespace.save(output.withBase(dataPath));
     });
     await output.complete();
-    console.log(`%c✅ Saved pack to ${output.savePath}`, "font-weight:bold;");
     return true;
   }
 }

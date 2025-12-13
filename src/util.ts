@@ -1,5 +1,13 @@
-export function error(message: string): never {
+export function log(message: string) {
   console.log(
+    `%cconduit%c ${message}`,
+    "color:cyan;font-weight:bold;",
+    "color:unset;font-weight:unset;",
+  );
+}
+
+export function error(message: string): never {
+  console.warn(
     `%cerror%c: ${message}`,
     "color:red;font-weight:bold;",
     "color:unset;font-weight:unset;",
@@ -7,7 +15,7 @@ export function error(message: string): never {
   Deno.exit(1);
 }
 export function warning(message: string) {
-  console.log(
+  console.warn(
     `%cwarning%c: ${message}`,
     "color:yellow;font-weight:bold;",
     "color:unset;font-weight:unset;",
