@@ -40,6 +40,8 @@ export default class Datapack extends Pack<"data"> {
       case "1.21.9":
       case "1.21.10":
         return [88, 0];
+      case "1.21.11":
+        return [94, 1];
     }
   }
   protected override getTypeString(): "data" {

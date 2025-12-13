@@ -1,6 +1,6 @@
 # <img src="./logo.png" height=40/>
 
-_Supported Minecraft versions: 1.21.5-10_ 
+_Supported Minecraft versions: 1.21.5-11_ 
 
 Make Minecraft packs using TypeScript!
 
