@@ -409,7 +409,7 @@ export function tag(
 }
 
 export function teleport(selector: Selector, pos: Pos, rotation: Rot): string {
-  return buildCommand("tp", pos, rotation);
+  return buildCommand("tp", selector, pos, rotation);
 }
 
 export function tellraw(selector: Selector, message: IntoText): string {
