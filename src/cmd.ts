@@ -408,7 +408,7 @@ export function tag(
   };
 }
 
-export function teleport(selector: Selector, pos: Pos, rotation: Rot): string {
+export function teleport(selector: Selector, pos: Pos, rotation?: Rot): string {
   return buildCommand("tp", selector, pos, rotation);
 }
 
