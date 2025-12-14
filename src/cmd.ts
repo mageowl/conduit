@@ -408,8 +408,8 @@ export function tag(
   };
 }
 
-export function teleport(selector: Selector, pos: Pos): string {
-  return `tp ${selector} ${pos}`;
+export function teleport(selector: Selector, pos: Pos, rotation: Rot): string {
+  return buildCommand("tp", pos, rotation);
 }
 
 export function tellraw(selector: Selector, message: IntoText): string {
