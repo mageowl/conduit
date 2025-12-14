@@ -1,5 +1,6 @@
 import { Identifier } from "../member.ts";
 import Function from "../member/function.ts";
+import Predicate from "../member/predicate.ts";
 import { Pos, type Rot } from "./pos.ts";
 import type Selector from "./selector.ts";
 
@@ -321,8 +322,7 @@ export class ExecuteCondition {
     return this.parent;
   }
 
-  // TODO: Inline definition
-  predicate(id: string): Execute {
+  predicate(id: Identifier<Predicate>): Execute {
     this.parent.instructions.push(`${this.mode} predicate ${id}`);
     return this.parent;
   }
