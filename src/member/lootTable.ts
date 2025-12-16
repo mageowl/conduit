@@ -1,4 +1,4 @@
-import { Appendable, type Identifier, JSONMember } from "../member.ts";
+import { type Appendable, type Identifier, JSONMember } from "../member.ts";
 import type Namespace from "../namespace.ts";
 import { type JSONValue, serialize } from "../serialize.ts";
 import type { RegistryTag } from "../tag.ts";
@@ -14,7 +14,14 @@ export default class LootTable extends JSONMember<"data">
   }
 
   append(other: this): void {
-    this.data.pools.push(...other.data.pools);
+    other.data.pools.forEach((pool, i) => {
+      const p = this.data.pools[i];
+      if (p != null) {
+        p.entries.push(...pool.entries);
+      } else {
+        this.data.pools[i] = pool;
+      }
+    });
     this.data.functions = [
       ...this.data.functions ?? [],
       ...other.data.functions ?? [],
