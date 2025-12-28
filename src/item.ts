@@ -1,5 +1,7 @@
 import type { Components } from "./itemComponents.ts";
+import type { ItemModifierDefinition } from "./member/itemModifier.ts";
 import { type JSONObject, type Serialize, serialize } from "./serialize.ts";
+import type { LootEntry } from "./types.ts";
 
 type ItemConfig = {
   id: string;
@@ -25,6 +27,20 @@ export default class Item implements Serialize {
 
   count(count: number): ItemStack {
     return new ItemStack(this, count);
+  }
+
+  toLootEntry(functions: ItemModifierDefinition[] = []): LootEntry {
+    return {
+      type: "item",
+      name: this.id,
+      functions: [
+        {
+          function: "set_components",
+          components: this.components,
+        },
+        ...functions,
+      ],
+    };
   }
 
   toString(): string {
