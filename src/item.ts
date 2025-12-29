@@ -82,6 +82,13 @@ export class ItemStack implements Serialize {
     };
   }
 
+  toLootEntry(functions: ItemModifierDefinition[] = []): LootEntry {
+    return this.item.toLootEntry([{
+      function: "set_count",
+      count: this.count,
+    }]);
+  }
+
   toString(): string {
     return `${this.item} ${this.count}`;
   }
