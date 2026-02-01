@@ -121,7 +121,7 @@ export type ClickEvent =
   | CustomClickEvent;
 type OpenUrlClickEvent = {
   action: "open_url";
-  dialog: `${UrlProtocol}://${string}`;
+  url: `${UrlProtocol}://${string}`;
 };
 type UrlProtocol = "https" | "http";
 type RunCommandClickEvent = {
