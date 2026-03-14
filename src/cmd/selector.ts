@@ -44,7 +44,6 @@ export default class Selector implements Serialize {
     return self;
   }
 
-  // TODO: rest of constraints
   x(x: number): this {
     this.constraints.push(["x", x.toString()]);
     return this;
@@ -72,6 +71,11 @@ export default class Selector implements Serialize {
 
   distance(range: Range): this {
     this.constraints.push(["distance", range.toString()]);
+    return this;
+  }
+
+  name(name: string): this {
+    this.constraints.push(["name", name]);
     return this;
   }
 

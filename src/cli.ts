@@ -3,8 +3,8 @@ import { error, log } from "./util.ts";
 import type { Version } from "./pack.ts";
 import ZippedOutput from "./output/zip.ts";
 import DirectoryOutput from "./output/directory.ts";
-import Output from "./output.ts";
-import { basename, dirname, join as joinPath } from "@std/path";
+import type Output from "./output.ts";
+import { dirname, join as joinPath } from "@std/path";
 import { parseArgs } from "@std/cli";
 import { exists } from "@std/fs";
 
