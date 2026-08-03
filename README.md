@@ -30,7 +30,7 @@ await pack.save("./example_out/basic/");
 
 ## Features
 
-Conduit is still in development. All unimported features can be replaced with [workarounds](#Workarounds)
+Conduit is still in development. All unimplemented features can be replaced with [workarounds](#Workarounds)
 
 - [x] Data packs
   - [x] Functions
